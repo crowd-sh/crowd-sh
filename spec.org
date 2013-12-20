@@ -1,0 +1,17 @@
+#+TITLE: CrowdWork
+
+* Purpose
+
+The end goal of the project is to create a framework which allows the
+creation of crowdsourcing jobs with quality assurance built in. This
+will happen by building a library which does the heavy lifting related
+to generating pages and keeping track of the various in between states.
+
+The user will write programs which define the appropriate input fields
+and information. These will then get generated into the appropriate
+pages and get sent to a crowdsourcing system such as Amazon Mechanical
+Turk.
+
+* Api
+
+Must create a type
