@@ -1,9 +1,53 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"reflect"
 )
+
+type Backender interface {
+	Publish(batch *Batch)
+	Execute()
+	Aggregate()
+}
+
+type TermServe struct {
+	Batch *Batch
+}
+
+func (ss TermServe) Publish(batch *Batch) {
+	ss.Batch = batch
+}
+
+func (ss TermServe) Execute() {
+	for _, j := range ss.Batch.Jobs {
+		for _, inp := range j.InputFields {
+			fmt.Println(inp.Description)
+			fmt.Println(inp.Value)
+		}
+
+		bio := bufio.NewReader(os.Stdin)
+		for i, out := range j.OutputFields {
+			fmt.Println(out.Description)
+			fmt.Println(out.Value)
+			line, _, _ := bio.ReadLine()
+			j.OutputFields[i].Value = string(line)
+		}
+	}
+}
+
+func (ss TermServe) Aggregate() {
+	fmt.Println(ss.Batch)
+
+	// for _, j := range ss.Batch.Jobs {
+	// 	// for _, out := range j.OutputFields {
+	// 	// 	fmt.Printf("%s\t%s", out.Id, out.Description)
+	// 	// }
+	// 	fmt.Println(j)
+	// }
+}
 
 /*
  * Task is a way to define the Job that needs to be run.
@@ -38,19 +82,6 @@ type JobField struct {
 	Type        string
 }
 
-func (jf JobField) Html() (html string) {
-	html += "    <div>\n"
-	html += "        <label>" + jf.Description + "</label>\n"
-	switch jf.Type {
-	case "image":
-		html += "        <img src=\"" + jf.Value + "\"/>\n"
-	default:
-		html += "        <input type=\"text\" name=\"" + jf.Id + "\" value=\"" + jf.Description + "\"/>\n"
-	}
-	html += "    </div>"
-	return
-}
-
 type Job struct {
 	Task         Task
 	InputFields  []JobField
@@ -58,17 +89,17 @@ type Job struct {
 }
 
 func (j Job) Execute() {
-	fmt.Println("<div>")
-	for _, inp := range j.InputFields {
-		fmt.Println(inp.Html())
-	}
-	fmt.Println("</div>")
+	// fmt.Println("<div>")
+	// for _, inp := range j.InputFields {
+	// 	fmt.Println(inp.Html())
+	// }
+	// fmt.Println("</div>")
 
-	fmt.Println("<div>")
-	for _, out := range j.OutputFields {
-		fmt.Println(out.Html())
-	}
-	fmt.Println("</div>")
+	// fmt.Println("<div>")
+	// for _, out := range j.OutputFields {
+	// 	fmt.Println(out.Html())
+	// }
+	// fmt.Println("</div>")
 }
 
 /*
@@ -79,14 +110,16 @@ type Batch struct {
 	Jobs []Job
 }
 
-func (b *Batch) Run() {
-	for _, j := range b.Jobs {
-		j.Execute()
-	}
+func (b *Batch) Run(ss Backender) {
+	ss.Publish(b)
+	ss.Execute()
+
+	ss.Aggregate()
 }
 
-func NewBatch(task Task) (batch *Batch) {
-	tasks := task.Tasks
+func NewBatch(task ...Task) (batch *Batch) {
+	// Handle more of the task cases.
+	tasks := task[0].Tasks
 
 	batch = &Batch{}
 
@@ -152,5 +185,8 @@ func main() {
 		},
 	}
 
-	NewBatch(business_cards).Run()
+	serve := TermServe{}
+	var backend Backender = serve
+	NewBatch(business_cards).Run(backend)
+
 }
