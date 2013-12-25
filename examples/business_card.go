@@ -36,5 +36,5 @@ func main() {
 
 	serve := TermServe{}
 	var backend Backender = serve
-	backend_cards_results := NewBatch(business_cards).Run(backend)
+	NewBatch(business_cards).Run(backend)
 }

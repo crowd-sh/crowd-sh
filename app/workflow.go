@@ -6,12 +6,9 @@ import (
 )
 
 // Interface for serving crowdsourcing jobs.
-type Backender interface {
+type Assigner interface {
 	// Publish a Batch to be done by workers.
-	Execute(batch *Batch)
-
-	// Aggregate the results.
-	Aggregate()
+	Execute(jobs chan Job, j Job)
 }
 
 type InputField string
@@ -50,12 +47,22 @@ type Task struct {
  */
 
 type Batch struct {
-	Jobs []Job
+	Jobs    []Job
+	Results []Job
 }
 
-func (b *Batch) Run(ss Backender) {
-	ss.Execute(b)
-	ss.Aggregate()
+func (b *Batch) Run(ss Assigner) {
+	jobs := make(chan Job)
+
+	for _, j := range b.Jobs {
+		go ss.Execute(jobs, j)
+	}
+
+	for i := 0; i < len(b.Jobs); i++ {
+		b.Results = append(b.Results, <-jobs)
+	}
+
+	fmt.Println(b.Results)
 }
 
 func NewBatch(task Task) (batch *Batch) {
