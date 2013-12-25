@@ -1,5 +1,12 @@
 package workmachine
 
+import (
+	"bufio"
+	"fmt"
+	. "github.com/abhiyerra/workmachine/app"
+	"os"
+)
+
 type TermServe struct {
 	Batch *Batch
 }

@@ -1,5 +1,9 @@
 package main
 
+import (
+	. "github.com/abhiyerra/workmachine/app"
+)
+
 type BusinessCard struct {
 	ImageUrl    InputField  `crowd_desc:"Use this information for the data below." crowd_id:"image_url" crowd_type:"image"`
 	Name        OutputField `crowd_desc:"Find the name from the business card" crowd_id:"name"`
@@ -33,5 +37,4 @@ func main() {
 	serve := TermServe{}
 	var backend Backender = serve
 	backend_cards_results := NewBatch(business_cards).Run(backend)
-
 }

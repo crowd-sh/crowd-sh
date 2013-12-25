@@ -1,9 +1,7 @@
 package workmachine
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"reflect"
 )
 
@@ -56,15 +54,13 @@ type Batch struct {
 }
 
 func (b *Batch) Run(ss Backender) {
-	ss.Publish(b)
-	ss.Execute()
-
+	ss.Execute(b)
 	ss.Aggregate()
 }
 
 func NewBatch(task Task) (batch *Batch) {
 	// Handle more of the task cases.
-	tasks := task[0].Tasks
+	tasks := task.Tasks
 
 	batch = &Batch{}
 
