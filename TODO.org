@@ -1,0 +1,23 @@
+
+* MTurk Serve
+** Post to Mechanical Turk
+
+* Html Serve
+** Use a fancy frontend
+** Make sure to return expired assignments
+** Be able to embed the code in JavaScript.
+** Need to specify the port and domain for the work
+
+* Have a review system in place.
+
+ - [ ] Field by field
+ - [ ] Work assurance
+ - [ ] Multiple user review system.
+
+* Clean up the workflow engine
+
+ - [ ] Make it less complex.
+
+* Create a workflow from JavaScript to run.
+
+ - [ ] Design workflows and generate a Go program from that.
