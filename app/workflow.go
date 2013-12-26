@@ -26,7 +26,6 @@ type JobField struct {
 }
 
 type Job struct {
-	Task         Task
 	InputFields  []JobField
 	OutputFields []JobField
 }
@@ -39,7 +38,8 @@ type Task struct {
 	Title       string
 	Description string
 	Price       int // In cents
-	Tasks       interface{}
+	Write       func(j *Job)
+	Tasks       interface{} // TODO: Name should be renamed Work or something like that.
 }
 
 /*
@@ -47,6 +47,7 @@ type Task struct {
  */
 
 type Batch struct {
+	Task    Task
 	Jobs    []Job
 	Results []Job
 }
@@ -58,20 +59,25 @@ func (b *Batch) Run(ss Assigner) {
 		go ss.Execute(jobs, j)
 	}
 
+	///	writer := csv.NewWriter(b.ResultsFile)
 	for i := 0; i < len(b.Jobs); i++ {
 		// TODO: Verify Job is actually done.
 		// if not then post it again.
-		b.Results = append(b.Results, <-jobs)
+		job_result := <-jobs
+
+		b.Results = append(b.Results, job_result)
+
+		b.Task.Write(&job_result)
 	}
 
-	fmt.Println(b.Results)
+	//fmt.Println(b.Results)
 }
 
 func NewBatch(task Task) (batch *Batch) {
 	// Handle more of the task cases.
 	tasks := task.Tasks
 
-	batch = &Batch{}
+	batch = &Batch{Task: task}
 
 	if reflect.TypeOf(tasks).Kind() != reflect.Slice {
 		fmt.Println("Wtf kind of shit is this?")
@@ -88,6 +94,7 @@ func NewBatch(task Task) (batch *Batch) {
 
 		// TODO NEED TO ADD TASK: Task: task
 		// fmt.Println(task.Type())
+		// job.Task = task
 
 		// Iterate over the fields of a struct
 		for j := 0; j < task.NumField(); j++ {
