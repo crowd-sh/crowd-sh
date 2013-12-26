@@ -59,6 +59,8 @@ func (b *Batch) Run(ss Assigner) {
 	}
 
 	for i := 0; i < len(b.Jobs); i++ {
+		// TODO: Verify Job is actually done.
+		// if not then post it again.
 		b.Results = append(b.Results, <-jobs)
 	}
 
