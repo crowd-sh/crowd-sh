@@ -107,7 +107,7 @@ func NewBatch(task Task) (batch *Batch) {
 				job.InputFields = append(job.InputFields, JobField{
 					// fmt.Println(task.Type().Field(j).Name)
 					Id:          task.Type().Field(j).Tag.Get(WorkId),
-					Description: task.Type().Field(j).Tag.Get("crowd_desc"),
+					Description: task.Type().Field(j).Tag.Get(WorkDesc),
 					Type:        task.Type().Field(j).Tag.Get("crowd_type"),
 					Value:       task.Field(j).String(),
 				})
@@ -115,7 +115,7 @@ func NewBatch(task Task) (batch *Batch) {
 				job.OutputFields = append(job.OutputFields, JobField{
 					// fmt.Println(task.Type().Field(j).Name)
 					Id:          task.Type().Field(j).Tag.Get(WorkId),
-					Description: task.Type().Field(j).Tag.Get("crowd_desc"),
+					Description: task.Type().Field(j).Tag.Get(WorkDesc),
 					Type:        task.Type().Field(j).Tag.Get("crowd_type"),
 				})
 
