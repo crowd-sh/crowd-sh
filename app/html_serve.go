@@ -16,8 +16,9 @@ func (ss HtmlServe) Execute(jobs chan Job, j Job) {
 		Assigned:  false,
 		JobsChan:  jobs,
 		Job:       j,
-		ExpiresIn: 1000,
+		StartedAt: time.Now(),
 	}
+
 	assignments = append(assignments, assignment)
 }
 
@@ -26,7 +27,7 @@ type Assignment struct {
 	JobsChan     chan Job
 	Job          Job
 	AssignmentId string
-	ExpiresIn    time.Duration
+	StartedAt    time.Time
 	Mutex        sync.RWMutex
 	Finished     bool
 }
@@ -40,10 +41,16 @@ func (a *Assignment) Assign() {
 	a.AssignmentId = a.generateAssignmentId()
 }
 
-func (a *Assignment) UnassignExpired() {
-	// TODO
-	// a.Assigned = false
-	// a.AssignmentId = ""
+const (
+	ExpireAfterMinutes = 5
+)
+
+func (a *Assignment) UnassignIfExpired() {
+	duration := time.Since(a.StartedAt) / time.Minute
+	if duration > ExpireAfterMinutes { // Greater than 5 minutes
+		a.Assigned = false
+		a.AssignmentId = ""
+	}
 }
 
 type Assignments []*Assignment
@@ -56,7 +63,7 @@ func (as Assignments) Get() *Assignment {
 	for _, a := range as {
 		a.Mutex.Lock()
 
-		a.UnassignExpired()
+		a.UnassignIfExpired()
 
 		if !a.Assigned && !a.Finished {
 			defer a.Mutex.Unlock()
@@ -102,8 +109,13 @@ func getAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 	output_html := ""
 	for _, out := range assign.Job.OutputFields {
 		output_html += `<div class=form-group>`
-		output_html += fmt.Sprintf("<label>%s</label><br>", out.Description)
-		output_html += fmt.Sprintf("<input type=text name=\"%s\" value=\"%s\"/>", out.Id, out.Value)
+		output_html += fmt.Sprintf("<label>%s</label>", out.Description)
+		switch out.Type {
+		case CheckBoxType:
+			output_html += fmt.Sprintf("<input type=checkbox name=\"%s\" value=\"yes\"/>", out.Id)
+		default:
+			output_html += fmt.Sprintf("<br><input type=text name=\"%s\" value=\"%s\"/>", out.Id, out.Value)
+		}
 		output_html += "</div>"
 	}
 

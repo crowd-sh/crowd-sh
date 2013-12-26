@@ -9,9 +9,13 @@ import (
 
 type ImageTagging struct {
 	ImageUrl             InputField  `work_desc:"Use this image to fill the information below." work_id:"image_url" work_type:"image"`
-	Tags                 OutputField `work_desc:"List all the relavent tags for this image." work_id:"tags"`
+	Tags                 OutputField `work_desc:"List all the relavent tags for this image. Ex. trees, castle, person" work_id:"tags"`
 	TextInImage          OutputField `work_desc:"Put any text that appears on the image here. One line per block of text." work_id:"text_in_image"`
-	IsCorrectOrientation OutputField `work_desc:"Is the image in the correct orientation?" work_id:"is_correct_orientation"`
+	IsCorrectOrientation OutputField `work_desc:"Is the image in the correct orientation?" work_id:"is_correct_orientation" work_type:"checkbox"`
+	IsLandscape          OutputField `work_desc:"Is the image of a landscape?" work_id:"is_landscape" work_type:"checkbox"`
+	IsPattern            OutputField `work_desc:"Is the image of a pattern?" work_id:"is_pattern" work_type:"checkbox"`
+	IsPerson             OutputField `work_desc:"Is the image of a person?" work_id:"is_person" work_type:"checkbox"`
+	TraditionalClothing  OutputField `work_desc:"Are they wearing traditional costume?" work_id:"tradtional_clothing" work_type:"checkbox"`
 }
 
 func imageUrls() (images []ImageTagging) {
