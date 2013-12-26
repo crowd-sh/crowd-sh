@@ -59,7 +59,6 @@ func (b *Batch) Run(ss Assigner) {
 		go ss.Execute(jobs, j)
 	}
 
-	///	writer := csv.NewWriter(b.ResultsFile)
 	for i := 0; i < len(b.Jobs); i++ {
 		// TODO: Verify Job is actually done.
 		// if not then post it again.
@@ -69,8 +68,6 @@ func (b *Batch) Run(ss Assigner) {
 
 		b.Task.Write(&job_result)
 	}
-
-	//fmt.Println(b.Results)
 }
 
 func NewBatch(task Task) (batch *Batch) {
