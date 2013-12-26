@@ -18,9 +18,6 @@ func (ss HtmlServe) Execute(jobs chan Job, j Job) {
 		ExpiresIn: 1000,
 	}
 	assignments = append(assignments, assignment)
-	fmt.Println(j)
-
-	<-assignment.JobsChan
 }
 
 type Assignment struct {
@@ -58,8 +55,6 @@ func getAssignment() *Assignment {
 func findAssignment(assignment_id string) *Assignment {
 	for _, a := range assignments {
 		if fmt.Sprintf("%x", a.AssignmentId) == assignment_id {
-
-			fmt.Printf("hello %s from %s", assignment_id, fmt.Sprintf("%x", a.AssignmentId))
 			return a
 		}
 	}
@@ -112,11 +107,19 @@ func getAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func postAssignmentHandler(w http.ResponseWriter, req *http.Request) {
-	a := findAssignment(req.FormValue("assignment_id"))
-	// a.Mutex.Lock()
-	// defer a.Mutex.Unlock()
+	assign := findAssignment(req.FormValue("assignment_id"))
 
-	fmt.Fprintf(w, "hi %v", a)
+	assign.Mutex.Lock()
+	for i, out := range assign.Job.OutputFields {
+		assign.Job.OutputFields[i].Value = req.FormValue(out.Id)
+	}
+
+	assign.Finished = true
+	assign.Mutex.Unlock()
+
+	assign.JobsChan <- assign.Job
+
+	fmt.Fprintf(w, "Submitted")
 }
 
 func Serve() {
