@@ -87,6 +87,7 @@ func (as Assignments) Find(assignment_id string) *Assignment {
 }
 
 func getAssignmentHandler(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("Num of Assignments", len(assignments))
 	assign := assignments.Get()
 	if assign == nil {
 		w.Write([]byte("Nothing to do."))
@@ -129,7 +130,7 @@ func getAssignmentHandler(w http.ResponseWriter, req *http.Request) {
   </head>
   <body>
     <div class="container">
-      <form method=post role="form">
+      <form method=post action="/assignment" role="form">
         <div>
           %s
         </div>
@@ -147,24 +148,26 @@ func getAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 
 func postAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Posting", req.FormValue("assignment_id"))
-	assign := assignments.Find(req.FormValue("assignment_id"))
 
-	assign.Mutex.Lock()
-	for i, out := range assign.Job.OutputFields {
-		assign.Job.OutputFields[i].Value = req.FormValue(out.Id)
+	assign := assignments.Find(req.FormValue("assignment_id"))
+	if assign != nil {
+		assign.Mutex.Lock()
+		for i, out := range assign.Job.OutputFields {
+			assign.Job.OutputFields[i].Value = req.FormValue(out.Id)
+		}
+
+		assign.Finished = true
+		assign.Mutex.Unlock()
+
+		assign.JobsChan <- assign.Job
 	}
 
-	assign.Finished = true
-	assign.Mutex.Unlock()
-
-	assign.JobsChan <- assign.Job
-
-	http.Redirect(w, req, "/assignment", 302)
+	http.Redirect(w, req, "/", 302)
 }
 
 func Serve() {
 	r := mux.NewRouter()
-	r.HandleFunc("/assignment", getAssignmentHandler).Methods("GET")
+	r.HandleFunc("/", getAssignmentHandler).Methods("GET")
 	r.HandleFunc("/assignment", postAssignmentHandler).Methods("POST")
 	http.Handle("/", r)
 	http.ListenAndServe(":5000", nil)
