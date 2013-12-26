@@ -31,13 +31,23 @@ type Assignment struct {
 	Finished     bool
 }
 
-func (a *Assignment) ClearExpire() {
-	// TODO
+func (a *Assignment) generateAssignmentId() string {
+	return fmt.Sprintf("%x", string(securecookie.GenerateRandomKey(128)))
+}
+
+func (a *Assignment) IsAssignmentId(assignment_id string) bool {
+	return fmt.Sprintf("%x", a.AssignmentId) == assignment_id
 }
 
 func (a *Assignment) Assign() {
 	a.Assigned = true
-	a.AssignmentId = string(securecookie.GenerateRandomKey(128))
+	a.AssignmentId = a.generateAssignmentId()
+}
+
+func (a *Assignment) UnassignExpired() {
+	// TODO
+	// a.Assigned = false
+	// a.AssignmentId = ""
 }
 
 type Assignments []*Assignment
@@ -50,7 +60,7 @@ func (as Assignments) Get() *Assignment {
 	for _, a := range as {
 		a.Mutex.Lock()
 
-		a.ClearExpire()
+		a.UnassignExpired()
 
 		if !a.Assigned && !a.Finished {
 			defer a.Mutex.Unlock()
@@ -65,7 +75,7 @@ func (as Assignments) Get() *Assignment {
 
 func (as Assignments) Find(assignment_id string) *Assignment {
 	for _, a := range as {
-		if fmt.Sprintf("%x", a.AssignmentId) == assignment_id {
+		if a.IsAssignmentId(assignment_id) {
 			return a
 		}
 	}
@@ -96,7 +106,7 @@ func getAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 		output_html += "</div>"
 	}
 
-	output_html += fmt.Sprintf("<input type=text name=\"assignment_id\" value=\"%x\">", assign.AssignmentId)
+	output_html += fmt.Sprintf("<input type=text name=\"assignment_id\" value=\"%s\">", assign.AssignmentId)
 	output_html += "<input type=submit>"
 
 	template := `<html>
