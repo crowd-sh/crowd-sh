@@ -8,7 +8,7 @@ import (
 )
 
 type ImageTagging struct {
-	ImageUrl             InputField  `work_desc:"Use this information for the data below." work_id:"image_url" work_type:"image"`
+	ImageUrl             InputField  `work_desc:"Use this image to fill the information below." work_id:"image_url" work_type:"image"`
 	Tags                 OutputField `work_desc:"List all the relavent tags for this image." work_id:"tags"`
 	TextInImage          OutputField `work_desc:"Put any text that appears on the image here. One line per block of text." work_id:"text_in_image"`
 	IsCorrectOrientation OutputField `work_desc:"Is the image in the correct orientation?" work_id:"is_correct_orientation"`

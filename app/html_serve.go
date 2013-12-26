@@ -88,36 +88,46 @@ func getAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 
 	input_html := ""
 	for _, inp := range assign.Job.InputFields {
-		input_html += "<div>"
-		input_html += fmt.Sprintf("<label>%s</label>", inp.Description)
-		input_html += fmt.Sprintf("<input type=text value=\"%s\"/>", inp.Value)
+		input_html += `<div class=form-group>`
+		input_html += fmt.Sprintf("<label>%s</label><br>", inp.Description)
+		switch inp.Type {
+		case ImageType:
+			input_html += fmt.Sprintf("<img src=\"%s\" />", inp.Value)
+		default:
+			input_html += fmt.Sprintf("<p>%s</p>", inp.Value)
+		}
 		input_html += "</div>"
 	}
 
 	output_html := ""
 	for _, out := range assign.Job.OutputFields {
-		output_html += "<div>"
+		output_html += `<div class=form-group>`
 		output_html += fmt.Sprintf("<label>%s</label><br>", out.Description)
 		output_html += fmt.Sprintf("<input type=text name=\"%s\" value=\"%s\"/>", out.Id, out.Value)
 		output_html += "</div>"
 	}
 
-	output_html += fmt.Sprintf("<input type=text name=\"assignment_id\" value=\"%s\">", assign.AssignmentId)
-	output_html += "<input type=submit>"
+	output_html += fmt.Sprintf("<input type=hidden name=\"assignment_id\" value=\"%s\">", assign.AssignmentId)
+	output_html += `<input type=submit value=Submit class="btn btn-default" >`
 
 	template := `<html>
-<head><title>Assignment</title></head>
-<body>
-<form method=post>
-  <div>
-    %s
-  </div>
+  <head>
+    <title>Assignment</title>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container">
+      <form method=post role="form">
+        <div>
+          %s
+        </div>
 
-  <div>
-    %s
-  </div>
-</form>
-</body>
+        <div>
+          %s
+        </div>
+      </form>
+    </div>
+  </body>
 </html>`
 
 	fmt.Fprintf(w, template, input_html, output_html)
@@ -137,7 +147,7 @@ func postAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 
 	assign.JobsChan <- assign.Job
 
-	fmt.Fprintf(w, "Submitted")
+	http.Redirect(w, req, "/assignment", 302)
 }
 
 func Serve() {

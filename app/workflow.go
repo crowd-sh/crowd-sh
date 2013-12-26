@@ -20,6 +20,12 @@ type Assigner interface {
 type InputField string
 type OutputField string
 
+const (
+	ImageType    = "image"
+	HiddenType   = "hidden"
+	CheckBoxType = "checkbox"
+)
+
 /*
  * Build a Job from a Task.
  */
