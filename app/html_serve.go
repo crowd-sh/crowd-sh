@@ -2,10 +2,11 @@ package workmachine
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/gorilla/securecookie"
+	"github.com/gorilla/mux"          // TODO: Deprecate this
+	"github.com/gorilla/securecookie" // TODO: Deprecate this
 	"net/http"
 	"sync"
+	"time"
 )
 
 type HtmlServe struct{}
@@ -25,25 +26,35 @@ type Assignment struct {
 	JobsChan     chan Job
 	Job          Job
 	AssignmentId string
-	ExpiresIn    int
-
-	Mutex    sync.RWMutex
-	Finished bool
+	ExpiresIn    time.Duration
+	Mutex        sync.RWMutex
+	Finished     bool
 }
 
+func (a *Assignment) ClearExpire() {
+	// TODO
+}
+
+func (a *Assignment) Assign() {
+	a.Assigned = true
+	a.AssignmentId = string(securecookie.GenerateRandomKey(128))
+}
+
+type Assignments []*Assignment
+
 var (
-	assignments []*Assignment
+	assignments Assignments
 )
 
-func getAssignment() *Assignment {
-	for _, a := range assignments {
+func (as Assignments) Get() *Assignment {
+	for _, a := range as {
 		a.Mutex.Lock()
+
+		a.ClearExpire()
+
 		if !a.Assigned && !a.Finished {
-			a.Assigned = true
-			a.AssignmentId = string(securecookie.GenerateRandomKey(128))
-
 			defer a.Mutex.Unlock()
-
+			a.Assign()
 			return a
 		}
 		a.Mutex.Unlock()
@@ -52,8 +63,8 @@ func getAssignment() *Assignment {
 	return nil
 }
 
-func findAssignment(assignment_id string) *Assignment {
-	for _, a := range assignments {
+func (as Assignments) Find(assignment_id string) *Assignment {
+	for _, a := range as {
 		if fmt.Sprintf("%x", a.AssignmentId) == assignment_id {
 			return a
 		}
@@ -63,7 +74,7 @@ func findAssignment(assignment_id string) *Assignment {
 }
 
 func getAssignmentHandler(w http.ResponseWriter, req *http.Request) {
-	assign := getAssignment()
+	assign := assignments.Get()
 	if assign == nil {
 		w.Write([]byte("Nothing to do."))
 		return
@@ -107,7 +118,7 @@ func getAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func postAssignmentHandler(w http.ResponseWriter, req *http.Request) {
-	assign := findAssignment(req.FormValue("assignment_id"))
+	assign := assignments.Find(req.FormValue("assignment_id"))
 
 	assign.Mutex.Lock()
 	for i, out := range assign.Job.OutputFields {
