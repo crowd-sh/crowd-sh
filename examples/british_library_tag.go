@@ -14,6 +14,27 @@ type ImageTagging struct {
 	IsCorrectOrientation OutputField `work_desc:"Is the image in the correct orientation?" work_id:"is_correct_orientation"`
 }
 
+func imageUrls() (images []ImageTagging) {
+	file, err := os.Open("list_of_pictures.csv")
+	if err != nil {
+		panic(err)
+	}
+
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+
+	for _, i := range records {
+		//		fmt.Printf("%s\n", i[1])
+		images = append(images, ImageTagging{ImageUrl: InputField(i[1])})
+	}
+
+	if err != nil {
+		panic(err)
+	}
+
+	return
+}
+
 func main() {
 	results_file, err := os.Create("results.csv")
 	if err != nil {
@@ -46,19 +67,14 @@ func main() {
 			}
 			writer.Flush()
 		},
-		Tasks: []ImageTagging{
-			ImageTagging{
-				ImageUrl: "http://www.flickr.com/photos/britishlibrary/11115401504",
-			},
-			ImageTagging{
-				ImageUrl: "wwwphotos/britishlibrary/11115401504",
-			},
-		},
+		Tasks: imageUrls(),
 	}
 
+	fmt.Println("Loaded and starting")
 	serve := HtmlServe{}
 	go Serve()
 
+	fmt.Println("Serving")
 	var backend Assigner = serve
 	NewBatch(image_tasks).Run(backend)
 

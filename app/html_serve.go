@@ -35,10 +35,6 @@ func (a *Assignment) generateAssignmentId() string {
 	return fmt.Sprintf("%x", string(securecookie.GenerateRandomKey(128)))
 }
 
-func (a *Assignment) IsAssignmentId(assignment_id string) bool {
-	return fmt.Sprintf("%x", a.AssignmentId) == assignment_id
-}
-
 func (a *Assignment) Assign() {
 	a.Assigned = true
 	a.AssignmentId = a.generateAssignmentId()
@@ -75,7 +71,7 @@ func (as Assignments) Get() *Assignment {
 
 func (as Assignments) Find(assignment_id string) *Assignment {
 	for _, a := range as {
-		if a.IsAssignmentId(assignment_id) {
+		if a.AssignmentId == assignment_id {
 			return a
 		}
 	}
@@ -128,6 +124,7 @@ func getAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func postAssignmentHandler(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("Posting", req.FormValue("assignment_id"))
 	assign := assignments.Find(req.FormValue("assignment_id"))
 
 	assign.Mutex.Lock()
