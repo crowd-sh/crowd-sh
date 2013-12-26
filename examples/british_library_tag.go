@@ -8,10 +8,10 @@ import (
 )
 
 type ImageTagging struct {
-	ImageUrl             InputField  `crowd_desc:"Use this information for the data below." crowd_id:"image_url" crowd_type:"image"`
-	Tags                 OutputField `crowd_desc:"List all the relavent tags for this image." crowd_id:"tags"`
-	TextInImage          OutputField `crowd_desc:"Put any text that appears on the image here. One line per block of text." crowd_id:"text_in_image"`
-	IsCorrectOrientation OutputField `crowd_desc:"Is the image in the correct orientation?" crowd_id:"is_correct_orientation"`
+	ImageUrl             InputField  `crowd_desc:"Use this information for the data below." work_id:"image_url" crowd_type:"image"`
+	Tags                 OutputField `crowd_desc:"List all the relavent tags for this image." work_id:"tags"`
+	TextInImage          OutputField `crowd_desc:"Put any text that appears on the image here. One line per block of text." work_id:"text_in_image"`
+	IsCorrectOrientation OutputField `crowd_desc:"Is the image in the correct orientation?" work_id:"is_correct_orientation"`
 }
 
 func main() {

@@ -5,18 +5,18 @@ import (
 )
 
 type BusinessCard struct {
-	ImageUrl    InputField  `crowd_desc:"Use this information for the data below." crowd_id:"image_url" crowd_type:"image"`
-	Name        OutputField `crowd_desc:"Find the name from the business card" crowd_id:"name"`
-	Company     OutputField `crowd_desc:"Find the company from the business card" crowd_id:"company"`
-	Email       OutputField `crowd_desc:"Find the email from the business card" crowd_id:"email"`
-	PhoneNumber OutputField `crowd_desc:"Find the phone number from the business card" crowd_id:"phone_number"`
+	ImageUrl    InputField  `crowd_desc:"Use this information for the data below." work_id:"image_url" crowd_type:"image"`
+	Name        OutputField `crowd_desc:"Find the name from the business card" work_id:"name"`
+	Company     OutputField `crowd_desc:"Find the company from the business card" work_id:"company"`
+	Email       OutputField `crowd_desc:"Find the email from the business card" work_id:"email"`
+	PhoneNumber OutputField `crowd_desc:"Find the phone number from the business card" work_id:"phone_number"`
 }
 
 type BusinessCardVerify struct {
-	ImageUrl InputField  `crowd_desc:"Use this information for the data below." crowd_id:"image_url" crowd_type:"image"`
-	Name     InputField  `crowd_desc:"Find the name from the business card" crowd_id:"name"`
-	Email    InputField  `crowd_desc:"Find the email from the business card" crowd_id:"email"`
-	IsValid  OutputField `crowd_desc:"Is the information above valid?" crowd_id:"is_valid"`
+	ImageUrl InputField  `crowd_desc:"Use this information for the data below." work_id:"image_url" crowd_type:"image"`
+	Name     InputField  `crowd_desc:"Find the name from the business card" work_id:"name"`
+	Email    InputField  `crowd_desc:"Find the email from the business card" work_id:"email"`
+	IsValid  OutputField `crowd_desc:"Is the information above valid?" work_id:"is_valid"`
 }
 
 func main() {

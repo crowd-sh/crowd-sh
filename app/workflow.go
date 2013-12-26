@@ -5,6 +5,12 @@ import (
 	"reflect"
 )
 
+const (
+	WorkId   = "work_id"
+	WorkDesc = "work_desc"
+	WorkType = "work_type"
+)
+
 // Interface for serving crowdsourcing jobs.
 type Assigner interface {
 	// Publish a Batch to be done by workers.
@@ -100,7 +106,7 @@ func NewBatch(task Task) (batch *Batch) {
 			case "InputField":
 				job.InputFields = append(job.InputFields, JobField{
 					// fmt.Println(task.Type().Field(j).Name)
-					Id:          task.Type().Field(j).Tag.Get("crowd_id"),
+					Id:          task.Type().Field(j).Tag.Get(WorkId),
 					Description: task.Type().Field(j).Tag.Get("crowd_desc"),
 					Type:        task.Type().Field(j).Tag.Get("crowd_type"),
 					Value:       task.Field(j).String(),
@@ -108,7 +114,7 @@ func NewBatch(task Task) (batch *Batch) {
 			case "OutputField":
 				job.OutputFields = append(job.OutputFields, JobField{
 					// fmt.Println(task.Type().Field(j).Name)
-					Id:          task.Type().Field(j).Tag.Get("crowd_id"),
+					Id:          task.Type().Field(j).Tag.Get(WorkId),
 					Description: task.Type().Field(j).Tag.Get("crowd_desc"),
 					Type:        task.Type().Field(j).Tag.Get("crowd_type"),
 				})
