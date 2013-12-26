@@ -39,7 +39,7 @@ type Job struct {
 /*
  * Task is a way to define the Job that needs to be run.
  */
-// crowd_type: output_image, output_text, input_text
+// work_type: output_image, output_text, input_text
 type Task struct {
 	Title       string
 	Description string
@@ -108,7 +108,7 @@ func NewBatch(task Task) (batch *Batch) {
 					// fmt.Println(task.Type().Field(j).Name)
 					Id:          task.Type().Field(j).Tag.Get(WorkId),
 					Description: task.Type().Field(j).Tag.Get(WorkDesc),
-					Type:        task.Type().Field(j).Tag.Get("crowd_type"),
+					Type:        task.Type().Field(j).Tag.Get(WorkType),
 					Value:       task.Field(j).String(),
 				})
 			case "OutputField":
@@ -116,7 +116,7 @@ func NewBatch(task Task) (batch *Batch) {
 					// fmt.Println(task.Type().Field(j).Name)
 					Id:          task.Type().Field(j).Tag.Get(WorkId),
 					Description: task.Type().Field(j).Tag.Get(WorkDesc),
-					Type:        task.Type().Field(j).Tag.Get("crowd_type"),
+					Type:        task.Type().Field(j).Tag.Get(WorkType),
 				})
 
 			default:
