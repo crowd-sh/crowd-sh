@@ -17,6 +17,7 @@ func (ss HtmlServe) Execute(jobs chan Job, j Job) {
 		JobsChan:  jobs,
 		Job:       j,
 		StartedAt: time.Now(),
+		Finished:  false,
 	}
 
 	assignments = append(assignments, assignment)
