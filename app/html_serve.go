@@ -13,11 +13,10 @@ type HtmlServe struct{}
 
 func (ss HtmlServe) Execute(jobs chan Job, j Job) {
 	assignment := &Assignment{
-		Assigned:  false,
-		JobsChan:  jobs,
-		Job:       j,
-		StartedAt: time.Now(),
-		Finished:  false,
+		Assigned: false,
+		JobsChan: jobs,
+		Job:      j,
+		Finished: false,
 	}
 
 	assignments = append(assignments, assignment)
@@ -40,6 +39,7 @@ func (a *Assignment) generateAssignmentId() string {
 func (a *Assignment) Assign() {
 	a.Assigned = true
 	a.AssignmentId = a.generateAssignmentId()
+	a.StartedAt = time.Now()
 }
 
 const (
