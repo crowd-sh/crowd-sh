@@ -131,15 +131,6 @@ func getAssignmentHandler(w http.ResponseWriter, req *http.Request) {
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
   </head>
   <body>
-<div id="fb-root"></div>
-<script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) return;
-  js = d.createElement(s); js.id = id;
-  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
-
 <a href="https://github.com/abhiyerra/britishlibrary"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
     <div class="container">
       <form method=post action="/assignment" role="form">
@@ -159,7 +150,6 @@ func getAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 <br>
 <a href="https://twitter.com/share" class="twitter-share-button" data-text="Tag the British Library Images" data-hashtags="workmachine">Tweet</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-<div class="fb-like" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
 <br>
 <br>
 <br>
