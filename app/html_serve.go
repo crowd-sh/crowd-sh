@@ -1,6 +1,7 @@
 package workmachine
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"          // TODO: Deprecate this
 	"github.com/gorilla/securecookie" // TODO: Deprecate this
@@ -23,13 +24,13 @@ func (ss HtmlServe) Execute(jobs chan Job, j Job) {
 }
 
 type Assignment struct {
-	Assigned     bool
-	JobsChan     chan Job
-	Job          Job
-	AssignmentId string
-	StartedAt    time.Time
-	Mutex        sync.RWMutex
-	Finished     bool
+	Assigned     bool         `json:"-"`
+	JobsChan     chan Job     `json:"-"`
+	Job          Job          `json:"job"`
+	AssignmentId string       `json:"assignment_id"`
+	StartedAt    time.Time    `json:"started_at"`
+	Mutex        sync.RWMutex `json:"-"`
+	Finished     bool         `json:"-"`
 }
 
 func (a *Assignment) generateAssignmentId() string {
@@ -95,76 +96,29 @@ func getAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	input_html := ""
-	for _, inp := range assign.Job.InputFields {
-		input_html += `<div class=form-group>`
-		input_html += fmt.Sprintf("<label>%s</label><br>", inp.Description)
-		switch inp.Type {
-		case ImageType:
-			input_html += fmt.Sprintf("<img src=\"%s\" />", inp.Value)
-		default:
-			input_html += fmt.Sprintf("<p>%s</p>", inp.Value)
-		}
-		input_html += "</div>"
+	renderJson(w, assign)
+}
+
+func renderJson(w http.ResponseWriter, page interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	fmt.Printf("%v", page)
+
+	b, err := json.Marshal(page)
+	if err != nil {
+		//log.Println("error:", err)
+		fmt.Fprintf(w, "")
 	}
 
-	output_html := ""
-	for _, out := range assign.Job.OutputFields {
-		output_html += `<div class=form-group>`
-		output_html += fmt.Sprintf("<label>%s</label>", out.Description)
-		switch out.Type {
-		case CheckBoxType:
-			output_html += fmt.Sprintf("<input type=checkbox name=\"%s\" value=\"yes\"/>", out.Id)
-		default:
-			output_html += fmt.Sprintf("<br><input type=text name=\"%s\" value=\"%s\"/>", out.Id, out.Value)
-		}
-		output_html += "</div>"
-	}
-
-	output_html += fmt.Sprintf("<input type=hidden name=\"assignment_id\" value=\"%s\">", assign.AssignmentId)
-	output_html += `<input type=submit value=Submit class="btn btn-default" >`
-	output_html += `&nbsp;<a href="/">Skip</a>`
-
-	template := `<html>
-  <head>
-    <title>Assignment</title>
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
-  </head>
-  <body>
-<a href="https://github.com/abhiyerra/britishlibrary"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
-    <div class="container">
-      <form method=post action="/assignment" role="form">
-        <div>
-          %s
-        </div>
-
-        <div>
-          %s
-        </div>
-      </form>
-
-    <footer>
-<br>
-<br>
-<br>
-<br>
-<a href="https://twitter.com/share" class="twitter-share-button" data-text="Tag the British Library Images" data-hashtags="workmachine">Tweet</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-<br>
-<br>
-<br>
-      Feedback <a href="http://twitter.com/abhiyerra">@abhiyerra</a> or <a href="mailto:abhi@berkeley.edu">abhi@berkeley.edu</a>
-    </footer>
-
-    </div>
-
-  </body>
-</html>`
-
-	fmt.Fprintf(w, template, input_html, output_html)
+	w.Write(b)
 }
 
 func postAssignmentHandler(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	fmt.Println("Posting Valies", req.Form)
 	fmt.Println("Posting", req.FormValue("assignment_id"))
 
 	assign := assignments.Find(req.FormValue("assignment_id"))
@@ -180,13 +134,13 @@ func postAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 		assign.JobsChan <- assign.Job
 	}
 
-	http.Redirect(w, req, "/", 302)
+	renderJson(w, true)
 }
 
 func Serve() {
 	r := mux.NewRouter()
-	r.HandleFunc("/", getAssignmentHandler).Methods("GET")
-	r.HandleFunc("/assignment", postAssignmentHandler).Methods("POST")
+	r.HandleFunc("/v1/assignment", getAssignmentHandler).Methods("GET")
+	r.HandleFunc("/v1/assignment", postAssignmentHandler).Methods("POST")
 	http.Handle("/", r)
 	http.ListenAndServe(":5000", nil)
 }

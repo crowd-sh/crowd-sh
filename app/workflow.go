@@ -38,8 +38,10 @@ type JobField struct {
 }
 
 type Job struct {
-	InputFields  []JobField
-	OutputFields []JobField
+	Title        string     `json:"title"`
+	Description  string     `json:"description"`
+	InputFields  []JobField `json:"input_fields"`
+	OutputFields []JobField `json:"output_fields"`
 }
 
 /*
@@ -82,11 +84,11 @@ func (b *Batch) Run(ss Assigner) {
 	}
 }
 
-func NewBatch(task Task) (batch *Batch) {
+func NewBatch(t Task) (batch *Batch) {
 	// Handle more of the task cases.
-	tasks := task.Tasks
+	tasks := t.Tasks
 
-	batch = &Batch{Task: task}
+	batch = &Batch{Task: t}
 
 	if reflect.TypeOf(tasks).Kind() != reflect.Slice {
 		fmt.Println("Wtf kind of shit is this?")
@@ -99,7 +101,10 @@ func NewBatch(task Task) (batch *Batch) {
 		// Figure out the information for one task.
 		task := s.Index(i)
 
-		job := Job{}
+		job := Job{
+			Title:       t.Title,
+			Description: t.Description,
+		}
 
 		// TODO NEED TO ADD TASK: Task: task
 		// fmt.Println(task.Type())
