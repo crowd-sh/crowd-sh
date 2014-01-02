@@ -24,22 +24,22 @@ func (ss HtmlServe) Execute(jobs chan Job, j Job) {
 }
 
 type Assignment struct {
-	Assigned     bool         `json:"-"`
-	JobsChan     chan Job     `json:"-"`
-	Job          Job          `json:"job"`
-	AssignmentId string       `json:"assignment_id"`
-	StartedAt    time.Time    `json:"started_at"`
-	Mutex        sync.RWMutex `json:"-"`
-	Finished     bool         `json:"-"`
+	Assigned  bool         `json:"-"`
+	JobsChan  chan Job     `json:"-"`
+	Job       Job          `json:"job"`
+	Id        string       `json:"id"`
+	StartedAt time.Time    `json:"started_at"`
+	Mutex     sync.RWMutex `json:"-"`
+	Finished  bool         `json:"-"`
 }
 
-func (a *Assignment) generateAssignmentId() string {
+func (a *Assignment) generateId() string {
 	return fmt.Sprintf("%x", string(securecookie.GenerateRandomKey(128)))
 }
 
 func (a *Assignment) Assign() {
 	a.Assigned = true
-	a.AssignmentId = a.generateAssignmentId()
+	a.Id = a.generateId()
 	a.StartedAt = time.Now()
 }
 
@@ -51,7 +51,7 @@ func (a *Assignment) UnassignIfExpired() {
 	duration := time.Since(a.StartedAt) / time.Minute
 	if duration > ExpireAfterMinutes { // Greater than 5 minutes
 		a.Assigned = false
-		a.AssignmentId = ""
+		a.Id = ""
 	}
 }
 
@@ -78,9 +78,9 @@ func (as Assignments) Get() *Assignment {
 	return nil
 }
 
-func (as Assignments) Find(assignment_id string) *Assignment {
+func (as Assignments) Find(id string) *Assignment {
 	for _, a := range as {
-		if a.AssignmentId == assignment_id {
+		if a.Id == id {
 			return a
 		}
 	}
@@ -118,10 +118,9 @@ func postAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	fmt.Println("Posting Valies", req.Form)
-	fmt.Println("Posting", req.FormValue("assignment_id"))
+	fmt.Println("Posting", req.FormValue("id"))
 
-	assign := assignments.Find(req.FormValue("assignment_id"))
+	assign := assignments.Find(req.FormValue("id"))
 	if assign != nil {
 		assign.Mutex.Lock()
 		for i, out := range assign.Job.OutputFields {
@@ -137,7 +136,7 @@ func postAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 	renderJson(w, true)
 }
 
-func Serve() {
+func HtmlServer() {
 	r := mux.NewRouter()
 	r.HandleFunc("/v1/assignment", getAssignmentHandler).Methods("GET")
 	r.HandleFunc("/v1/assignment", postAssignmentHandler).Methods("POST")

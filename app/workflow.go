@@ -51,7 +51,7 @@ type Job struct {
 type Task struct {
 	Title       string
 	Description string
-	Price       int // In cents
+	Price       uint // In cents
 	Write       func(j *Job)
 	Tasks       interface{} // TODO: Name should be renamed Work or something like that.
 }
