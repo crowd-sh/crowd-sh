@@ -21,6 +21,7 @@ type InputField string
 type OutputField string
 
 const (
+	LongTextType = "long_text"
 	ImageType    = "image"
 	HiddenType   = "hidden"
 	CheckBoxType = "checkbox"
