@@ -1,0 +1,50 @@
+<section class="row" ng-controller="WorkCtrl">
+  <div class="col-lg-12">
+    <h1>{{assignment.job.title}}</h1>
+
+    <div class="description" ng-bind-html="assignment.job.description"></div>
+
+    <form novalidate role="form" ng-submit="postAssignment();">
+      <div class="input-fields form-group" ng-repeat="field in assignment.job.input_fields">
+        <label>{{field.Description}}</label>
+
+        <div class="animate-switch-container" ng-switch on="field.Type">
+          <div class="animate-switch" ng-switch-when="image">
+            <img ng-src="{{field.Value}}" class="img-thumbnail img-responsive" />
+          </div>
+
+          <div class="animate-switch" ng-switch-when="hidden">
+            <input type="hidden" value="{{field.Value}}" ng-name="{{field.Id}}" />
+          </div>
+
+          <div class="animate-switch" ng-switch-default>
+            {{field.Value}}
+          </div>
+        </div>
+      </div>
+
+      <div class="output-fields form-group" ng-repeat="field in assignment.job.output_fields">
+        <label>{{field.Description}}</label>
+
+        <div class="animate-switch-container" ng-switch on="field.Type">
+          <div class="animate-switch" ng-switch-when="checkbox">
+            <input type="checkbox" ng-value="yes" ng-name="{{field.Id}}" ng-model="work[field.Id]" class="form-control" />
+          </div>
+
+          <div class="animate-switch" ng-switch-when="long_text">
+            <textarea ng-name="{{field.Id}}" ng-model="work[field.Id]" class="form-control"></textarea>
+          </div>
+
+          <div class="animate-switch" ng-switch-default>
+            <input type="text" ng-name="{{field.Id}}" ng-model="work[field.Id]" class="form-control" />
+          </div>
+        </div>
+      </div>
+
+      <input type="hidden" ng-value="{{assignment.id}}" ng-name="id" ng-model="work[id]" />
+
+      <input type="submit" value="Submit" class="btn btn-success" />
+      <a href="#/skip">Skip</a>
+    </form>
+  </div>
+</section>

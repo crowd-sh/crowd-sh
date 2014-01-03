@@ -1,0 +1,28 @@
+#+TITLE: Work Index
+
+#+API_TYPE: json
+
+The work index is a central location for jobs run by all the
+crowdflows. It lists the jobs where people come and do work. It acts
+as an alternate to Mechanical Turk. With the eventual goal of
+micropayments to users who do work. This is also what is used on the
+frontend.
+
+* POST /v1/workflow
+  :PROPERTIES:
+  :api_key_PARAM: required
+  :address_PARAM: required
+  :title_PARAM: required
+  :tags_PARAM: required
+  :description_PARAM: required
+  :reward_PARAM: required
+  :RESPONSE: { "id" }
+  :END:
+
+* GET /v1/workflow/:id/assignment
+
+  Redirect to the appropriate assignment
+
+* POST /v1/workflow/:id/assignment
+
+  Redirect to the appropriate assignment
