@@ -1,11 +1,11 @@
 <section class="row" ng-controller="WorkCtrl">
   <div class="col-lg-12">
-    <h1>{{assignment.job.title}}</h1>
+    <h1>{{assignment.job.info.title}}</h1>
 
-    <div class="description" ng-bind-html="assignment.job.description"></div>
+    <div class="description" ng-bind-html="assignment.job.info.description"></div>
 
     <form novalidate role="form" ng-submit="postAssignment();">
-      <div class="input-fields form-group" ng-repeat="field in assignment.job.input_fields">
+      <div class="input-fields form-group" ng-repeat="field in assignment.job.info.input_fields">
         <label>{{field.Description}}</label>
 
         <div class="animate-switch-container" ng-switch on="field.Type">
@@ -23,20 +23,20 @@
         </div>
       </div>
 
-      <div class="output-fields form-group" ng-repeat="field in assignment.job.output_fields">
-        <label>{{field.Description}}</label>
+      <div class="output-fields form-group">
+        <label>{{assignment.job.output.Description}}</label>
 
-        <div class="animate-switch-container" ng-switch on="field.Type">
+        <div class="animate-switch-container" ng-switch on="assignment.job.output.Type">
           <div class="animate-switch" ng-switch-when="checkbox">
-            <input type="checkbox" ng-value="yes" ng-name="{{field.Id}}" ng-model="work[field.Id]" class="form-control" />
+            <input type="checkbox" ng-value="yes" ng-name="{{assignment.job.output.Id}}" ng-model="work[assignment.job.output.Id]" class="form-control" />
           </div>
 
           <div class="animate-switch" ng-switch-when="long_text">
-            <textarea ng-name="{{field.Id}}" ng-model="work[field.Id]" class="form-control"></textarea>
+            <textarea ng-name="{{assignment.job.output.Id}}" ng-model="work[assignment.job.output.Id]" class="form-control"></textarea>
           </div>
 
           <div class="animate-switch" ng-switch-default>
-            <input type="text" ng-name="{{field.Id}}" ng-model="work[field.Id]" class="form-control" />
+            <input type="text" ng-name="{{assignment.job.output.Id}}" ng-model="work[assignment.job.output.Id]" class="form-control" />
           </div>
         </div>
       </div>

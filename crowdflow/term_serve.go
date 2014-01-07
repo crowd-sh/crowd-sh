@@ -8,7 +8,7 @@ import (
 
 type TermServe struct{}
 
-func (ss TermServe) Execute(jobs chan Job, j Job) {
+func (ss TermServe) Execute(jobs chan MetaJob, j MetaJob) {
 	for _, inp := range j.InputFields {
 		fmt.Println(inp.Description)
 		fmt.Println(inp.Value)

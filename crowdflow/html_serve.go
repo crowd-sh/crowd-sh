@@ -92,7 +92,7 @@ func getAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Num of Assignments", len(assignments))
 	assign := assignments.Get()
 	if assign == nil {
-		w.Write([]byte("Nothing to do."))
+		renderJson(w, "Nothing to do.")
 		return
 	}
 
@@ -123,9 +123,8 @@ func postAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 	assign := assignments.Find(req.FormValue("id"))
 	if assign != nil {
 		assign.Mutex.Lock()
-		for i, out := range assign.Job.OutputFields {
-			assign.Job.OutputFields[i].Value = req.FormValue(out.Id)
-		}
+		out := assign.Job.OutputField
+		out.Value = req.FormValue(out.Id)
 
 		assign.Finished = true
 		assign.Mutex.Unlock()

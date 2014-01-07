@@ -6,10 +6,10 @@ import (
 	"os"
 )
 
-func CsvJobWriter(file *os.File) func(j *Job) {
+func CsvJobWriter(file *os.File) func(j *MetaJob) {
 	writer := csv.NewWriter(file)
 
-	return func(j *Job) {
+	return func(j *MetaJob) {
 		fmt.Printf("%v\n", j)
 
 		var output []string

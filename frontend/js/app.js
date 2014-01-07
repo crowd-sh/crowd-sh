@@ -2,16 +2,11 @@ if(window.location.href.match("localhost")) {
     WorkMachine = {
         server: "http://localhost:5000",
     }
-} else if(window.location.href.match("britishlibrary")) {
+} else if(window.location.href.match("workmachine.us")) {
     WorkMachine = {
         server: "http://britishlibraryapi.workmachine.us:5000",
     }
-} else if(window.location.href.match("leadgen")) {
-    WorkMachine = {
-        server: "http://leadgenapi.workmachine.us:5000",
-    }
 }
-
 
 angular.module('workmachine', ['ngRoute'])
 
@@ -53,7 +48,7 @@ angular.module('workmachine', ['ngRoute'])
         $scope.work = {}
         WorkMachineService.getAssignment().then(function(data) {
             $scope.assignment = data;
-            $scope.assignment.job.description = $sce.trustAsHtml(data.job.description);
+            $scope.assignment.job.info.description = $sce.trustAsHtml(data.job.info.description);
         });
 
         $scope.postAssignment = function() {

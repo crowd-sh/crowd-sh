@@ -17,34 +17,6 @@ type Assigner interface {
 	Execute(jobs chan Job, j Job)
 }
 
-type InputField string
-type OutputField string
-
-const (
-	LongTextType = "long_text"
-	ImageType    = "image"
-	HiddenType   = "hidden"
-	CheckBoxType = "checkbox"
-)
-
-/*
- * Build a Job from a Task.
- */
-
-type JobField struct {
-	Id          string
-	Value       string
-	Description string
-	Type        string
-}
-
-type Job struct {
-	Title        string     `json:"title"`
-	Description  string     `json:"description"`
-	InputFields  []JobField `json:"input_fields"`
-	OutputFields []JobField `json:"output_fields"`
-}
-
 /*
  * Task is a way to define the Job that needs to be run.
  */
@@ -53,7 +25,7 @@ type Task struct {
 	Title       string
 	Description string
 	Price       uint // In cents
-	Write       func(j *Job)
+	Write       func(j *MetaJob)
 	Tasks       interface{} // TODO: Name should be renamed Work or something like that.
 }
 
@@ -62,24 +34,21 @@ type Task struct {
  */
 
 type Batch struct {
-	Task    Task
-	Jobs    []Job
-	Results []Job
+	Task     Task
+	MetaJobs []MetaJob
 }
 
-func (b *Batch) Run(ss Assigner) {
-	jobs := make(chan Job)
+func (b *Batch) Run(assigner Assigner) {
+	meta_jobs := make(chan MetaJob)
 
-	for _, j := range b.Jobs {
-		go ss.Execute(jobs, j)
+	for _, j := range b.MetaJobs {
+		go j.StartJobs(assigner, meta_jobs, j)
 	}
 
-	for i := 0; i < len(b.Jobs); i++ {
+	for i := 0; i < len(b.MetaJobs); i++ {
 		// TODO: Verify Job is actually done.
 		// if not then post it again.
-		job_result := <-jobs
-
-		b.Results = append(b.Results, job_result)
+		job_result := <-meta_jobs
 
 		b.Task.Write(&job_result)
 	}
@@ -102,7 +71,7 @@ func NewBatch(t Task) (batch *Batch) {
 		// Figure out the information for one task.
 		task := s.Index(i)
 
-		job := Job{
+		job := MetaJob{
 			Title:       t.Title,
 			Description: t.Description,
 		}
@@ -120,7 +89,7 @@ func NewBatch(t Task) (batch *Batch) {
 					// fmt.Println(task.Type().Field(j).Name)
 					Id:          task.Type().Field(j).Tag.Get(WorkId),
 					Description: task.Type().Field(j).Tag.Get(WorkDesc),
-					Type:        task.Type().Field(j).Tag.Get(WorkType),
+					Type:        JobFieldType(task.Type().Field(j).Tag.Get(WorkType)),
 					Value:       task.Field(j).String(),
 				})
 			case "OutputField":
@@ -128,7 +97,7 @@ func NewBatch(t Task) (batch *Batch) {
 					// fmt.Println(task.Type().Field(j).Name)
 					Id:          task.Type().Field(j).Tag.Get(WorkId),
 					Description: task.Type().Field(j).Tag.Get(WorkDesc),
-					Type:        task.Type().Field(j).Tag.Get(WorkType),
+					Type:        JobFieldType(task.Type().Field(j).Tag.Get(WorkType)),
 				})
 
 			default:
@@ -136,7 +105,7 @@ func NewBatch(t Task) (batch *Batch) {
 			}
 		}
 
-		batch.Jobs = append(batch.Jobs, job)
+		batch.MetaJobs = append(batch.MetaJobs, job)
 	}
 
 	return
