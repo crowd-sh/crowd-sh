@@ -8,7 +8,7 @@ if(window.location.href.match("localhost")) {
     }
 }
 
-angular.module('workmachine', ['ngRoute'])
+angular.module('workmachine', ['ngRoute', 'ngTouch'])
 
     .config(function($routeProvider) {
         $routeProvider
@@ -62,5 +62,7 @@ angular.module('workmachine', ['ngRoute'])
             $scope.work['id'] = $scope.assignment.id;
             WorkMachineService.postAssignment($scope.work);
             window.location = "#/new";
+
+            return true;
         };
     });

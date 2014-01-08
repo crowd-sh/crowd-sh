@@ -30,8 +30,8 @@
 
         <div class="animate-switch-container" ng-switch on="assignment.job.output.Type">
           <div class="animate-switch" ng-switch-when="checkbox">
-            <input type="button" ng-name="{{assignment.job.output.Id}}" ng-model="work[assignment.job.output.Id]" class="btn btn-success" ng-value="'Yes'" ng-click="submitCheckbox('yes');"/>
-            <input type="button" ng-name="{{assignment.job.output.Id}}" ng-model="work[assignment.job.output.Id]" class="btn btn-danger" ng-value="'No'" ng-click="submitCheckbox('no');"/>
+            <input type="submit" ng-name="{{assignment.job.output.Id}}" ng-model="work[assignment.job.output.Id]" class="btn btn-success" ng-value="'Yes'" ng-click="submitCheckbox('yes');""/>
+            <input type="submit" ng-name="{{assignment.job.output.Id}}" ng-model="work[assignment.job.output.Id]" class="btn btn-danger" ng-value="'No'" ng-click="submitCheckbox('no');"/>
 
             <a href="#/skip" class="btn btn-warning">Skip</a>
           </div>
