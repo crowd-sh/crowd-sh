@@ -45,11 +45,18 @@ angular.module('workmachine', ['ngRoute'])
     })
 
     .controller('WorkCtrl', function($scope, $sce, WorkMachineService) {
-        $scope.work = {}
+        $scope.work = {};
+
         WorkMachineService.getAssignment().then(function(data) {
             $scope.assignment = data;
             $scope.assignment.job.info.description = $sce.trustAsHtml(data.job.info.description);
         });
+
+        $scope.submitCheckbox = function(value) {
+            $scope.work[$scope.assignment.job.output.Id] = value;
+
+            $scope.postAssignment();
+        };
 
         $scope.postAssignment = function() {
             $scope.work['id'] = $scope.assignment.id;

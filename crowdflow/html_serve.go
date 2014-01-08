@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"          // TODO: Deprecate this
 	"github.com/gorilla/securecookie" // TODO: Deprecate this
+	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -89,10 +90,9 @@ func (as Assignments) Find(id string) *Assignment {
 }
 
 func getAssignmentHandler(w http.ResponseWriter, req *http.Request) {
-	fmt.Println("Num of Assignments", len(assignments))
 	assign := assignments.Get()
 	if assign == nil {
-		renderJson(w, "Nothing to do.")
+		renderJson(w, false)
 		return
 	}
 
@@ -103,13 +103,13 @@ func renderJson(w http.ResponseWriter, page interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	fmt.Printf("%v", page)
-
 	b, err := json.Marshal(page)
 	if err != nil {
 		//log.Println("error:", err)
 		fmt.Fprintf(w, "")
 	}
+
+	log.Println("Rendered Page")
 
 	w.Write(b)
 }
