@@ -28,8 +28,6 @@
       <div class="output-fields form-group">
         <label>{{assignment.job.output.Description}}</label>
 
-{{assignment.job.output}}
-
         <div class="animate-switch-container" ng-switch on="assignment.job.output.Type">
           <div class="animate-switch" ng-switch-when="checkbox">
             <input type="button" ng-name="{{assignment.job.output.Id}}" ng-model="work[assignment.job.output.Id]" class="btn btn-success" ng-value="'Yes'" ng-click="submitCheckbox('yes');"/>
