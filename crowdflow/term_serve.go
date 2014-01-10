@@ -1,4 +1,4 @@
-package workmachine
+package crowdflow
 
 import (
 	"bufio"

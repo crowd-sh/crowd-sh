@@ -1,7 +1,7 @@
 package main
 
 import (
-	. "github.com/abhiyerra/workmachine/app"
+	. "github.com/abhiyerra/workmachine/crowdflow"
 )
 
 type BusinessCard struct {
