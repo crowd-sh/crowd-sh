@@ -11,17 +11,11 @@ const (
 	WorkType = "work_type"
 )
 
-// Interface for serving crowdsourcing jobs.
-type Assigner interface {
-	// Publish a Batch to be done by workers.
-	Execute(jobs chan Job, j Job)
-}
-
 /*
- * Task is a way to define the Job that needs to be run.
+ * TaskDesc is a way to define the Job that needs to be run.
  */
 // work_type: output_image, output_text, input_text
-type Task struct {
+type TaskDesc struct {
 	Title       string
 	Description string
 	Price       uint // In cents
@@ -34,7 +28,7 @@ type Task struct {
  */
 
 type Batch struct {
-	Task     Task
+	TaskDesc TaskDesc
 	MetaJobs []MetaJob
 }
 
@@ -50,15 +44,16 @@ func (b *Batch) Run(assigner Assigner) {
 		// if not then post it again.
 		job_result := <-meta_jobs
 
-		b.Task.Write(&job_result)
+		b.TaskDesc.Write(&job_result)
 	}
 }
 
-func NewBatch(t Task) (batch *Batch) {
-	// Handle more of the task cases.
+func NewBatch(t TaskDesc) (batch *Batch) {
+	// TODO: Handle more of the task cases.
+
 	tasks := t.Tasks
 
-	batch = &Batch{Task: t}
+	batch = &Batch{TaskDesc: t}
 
 	if reflect.TypeOf(tasks).Kind() != reflect.Slice {
 		fmt.Println("Wtf kind of shit is this?")

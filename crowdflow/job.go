@@ -4,6 +4,12 @@ import (
 	"fmt"
 )
 
+// Interface for serving crowdsourcing jobs.
+type Assigner interface {
+	// Publish a Batch to be done by workers.
+	Execute(jobs chan Job, j Job)
+}
+
 type InputField string
 type OutputField string
 
