@@ -1,7 +1,7 @@
 <section class="row" ng-controller="WorkCtrl">
   <div class="col-lg-12 col-lg-12 col-sm-12 col-xs-12" ng-show="assignment">
     <form novalidate role="form" ng-submit="postAssignment();">
-      <h1>{{assignment.job.info.title}}</h1>
+      <h1>{{assignment.job.output.Description}}</h1>
 
       <div class="description" ng-bind-html="assignment.job.info.description"></div>
 
@@ -26,8 +26,6 @@
       </div>
 
       <div class="output-fields form-group">
-        <label>{{assignment.job.output.Description}}</label>
-
         <div class="animate-switch-container" ng-switch on="assignment.job.output.Type">
           <div class="animate-switch" ng-switch-when="checkbox">
             <input type="submit" ng-name="{{assignment.job.output.Id}}" ng-model="work[assignment.job.output.Id]" class="btn btn-success btn-lg btn-block" ng-value="'Yes'" ng-click="submitCheckbox('yes');""/>

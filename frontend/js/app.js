@@ -61,8 +61,22 @@ angular.module('workmachine', ['ngRoute', 'ngTouch'])
         $scope.postAssignment = function() {
             $scope.work['id'] = $scope.assignment.id;
             WorkMachineService.postAssignment($scope.work);
+
+            if(Android != undefined) {
+                Android.incrementTask();
+            }
+
             window.location = "#/new";
 
             return true;
         };
+    })
+
+    .controller('LeaderBoardCtrl', function($scope, WorkMachineService) {
+        $scope.leaderboard = [];
+
+        if(Android != undefined) {
+            $scope.leaderboard = Android.getLeaderboard();
+        }
+
     });
