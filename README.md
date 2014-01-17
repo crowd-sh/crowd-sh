@@ -1,5 +1,7 @@
 # WorkMachine
 
+[![Build Status](https://travis-ci.org/abhiyerra/workmachine.png?branch=master)](https://travis-ci.org/abhiyerra/workmachine)
+
 WorkMachine allows you to run crowdsourced workflows involving human
 intervention. For example, take image transcription can be processed
 using an OCR engine but that doesn't assure use that the quality will
