@@ -32,11 +32,27 @@ type Batch struct {
 	MetaJobs []MetaJob
 }
 
-func (b *Batch) Run(assigner Assigner) {
+func (b *Batch) Run(assigner Assigner, splitJob bool) {
 	meta_jobs := make(chan MetaJob)
 
 	for _, j := range b.MetaJobs {
-		go j.StartJobs(assigner, meta_jobs, j)
+		go j.StartJob(assigner, meta_jobs, j)
+	}
+
+	for i := 0; i < len(b.MetaJobs); i++ {
+		// TODO: Verify Job is actually done.
+		// if not then post it again.
+		job_result := <-meta_jobs
+
+		b.TaskDesc.Write(&job_result)
+	}
+}
+
+func (b *Batch) RunSplit(assigner SplitAssigner, splitJob bool) {
+	meta_jobs := make(chan MetaJob)
+
+	for _, j := range b.MetaJobs {
+		go j.StartSplitJob(assigner, meta_jobs, j)
 	}
 
 	for i := 0; i < len(b.MetaJobs); i++ {
