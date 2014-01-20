@@ -1,8 +1,8 @@
 package crowdflow
 
-type HtmlServe struct{}
+type BulkServe struct{}
 
-func (ss HtmlServe) Execute(jobs chan MetaJob, j MetaJob) {
+func (ss BulkServe) Execute(jobs chan MetaJob, j MetaJob) {
 	assignment := &BulkAssignment{
 		JobsChan: jobs,
 		Job:      j,

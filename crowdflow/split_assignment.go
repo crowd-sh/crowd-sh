@@ -1,5 +1,20 @@
 package crowdflow
 
+type SplitHtmlServe struct{}
+
+func (ss SplitHtmlServe) Execute(jobs chan Job, j Job) {
+	assignment := &SplitAssignment{
+		JobsChan: jobs,
+		Job:      j,
+		Assignment: Assignment{
+			Assigned: false,
+			Finished: false,
+		},
+	}
+
+	split_assignments = append(split_assignments, assignment)
+}
+
 type SplitAssignment struct {
 	Assignment
 	JobsChan chan Job `json:"-"`
@@ -21,21 +36,6 @@ type SplitAssignments []*SplitAssignment
 var (
 	split_assignments SplitAssignments
 )
-
-type SplitHtmlServe struct{}
-
-func (ss SplitHtmlServe) Execute(jobs chan Job, j Job) {
-	assignment := &SplitAssignment{
-		JobsChan: jobs,
-		Job:      j,
-		Assignment: Assignment{
-			Assigned: false,
-			Finished: false,
-		},
-	}
-
-	split_assignments = append(split_assignments, assignment)
-}
 
 func (as SplitAssignments) Get() *SplitAssignment {
 	for _, a := range as {

@@ -29,8 +29,8 @@ func postSplitAssignmentHandler(w http.ResponseWriter, req *http.Request) {
 
 func HtmlServer() {
 	r := mux.NewRouter()
-	r.HandleFunc("/v1/assignment", getSplitAssignmentHandler).Methods("GET")
-	r.HandleFunc("/v1/assignment", postSplitAssignmentHandler).Methods("POST")
+	r.HandleFunc("/v1/assignment/split", getSplitAssignmentHandler).Methods("GET")
+	r.HandleFunc("/v1/assignment/split", postSplitAssignmentHandler).Methods("POST")
 	http.Handle("/", r)
 	http.ListenAndServe(":5000", nil)
 }

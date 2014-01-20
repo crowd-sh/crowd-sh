@@ -32,7 +32,7 @@ type Batch struct {
 	MetaJobs []MetaJob
 }
 
-func (b *Batch) Run(assigner Assigner, splitJob bool) {
+func (b *Batch) Run(assigner Assigner) {
 	meta_jobs := make(chan MetaJob)
 
 	for _, j := range b.MetaJobs {
@@ -48,7 +48,7 @@ func (b *Batch) Run(assigner Assigner, splitJob bool) {
 	}
 }
 
-func (b *Batch) RunSplit(assigner SplitAssigner, splitJob bool) {
+func (b *Batch) RunSplit(assigner SplitAssigner) {
 	meta_jobs := make(chan MetaJob)
 
 	for _, j := range b.MetaJobs {

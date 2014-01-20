@@ -21,6 +21,7 @@ func TestCrowdflow(t *testing.T) {
 	RunSpecs(t, "Crowdflow Suite")
 }
 
+/*
 func TestCrowdflow2(t *testing.T) {
 
 	// serve := HtmlServe{}
@@ -39,5 +40,6 @@ func TestCrowdflow2(t *testing.T) {
 	   - Make sure that the jobs are created
 	   - Make sure that the we can get the assignment.
 	   - Make sure that we can post the assignment
-	*/
+	* /
 }
+*/

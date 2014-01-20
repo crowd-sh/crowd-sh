@@ -1,6 +1,7 @@
 if(window.location.href.match("localhost")) {
     WorkMachine = {
-        server: "http://localhost:5000",
+        //server: "http://localhost:5000",
+        server: "http://britishlibraryapi.workmachine.us:5000",
     }
 } else if(window.location.href.match("workmachine.us")) {
     WorkMachine = {
@@ -62,7 +63,7 @@ angular.module('workmachine', ['ngRoute', 'ngTouch'])
             $scope.work['id'] = $scope.assignment.id;
             WorkMachineService.postAssignment($scope.work);
 
-            if(Android != undefined) {
+            if(typeof Android != 'undefined') {
                 Android.incrementTask();
             }
 
@@ -75,7 +76,7 @@ angular.module('workmachine', ['ngRoute', 'ngTouch'])
     .controller('LeaderBoardCtrl', function($scope, WorkMachineService) {
         $scope.leaderboard = [];
 
-        if(Android != undefined) {
+        if(typeof Android != 'undefined') {
             $scope.leaderboard = Android.getLeaderboard();
         }
 
