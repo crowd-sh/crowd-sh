@@ -18,6 +18,7 @@ const (
 type TaskDesc struct {
 	Title       string
 	Description string
+	Tags        string
 	Price       uint // In cents
 	Write       func(j *MetaJob)
 	Tasks       interface{} // TODO: Name should be renamed Work or something like that.
@@ -83,8 +84,7 @@ func NewBatch(t TaskDesc) (batch *Batch) {
 		task := s.Index(i)
 
 		job := MetaJob{
-			Title:       t.Title,
-			Description: t.Description,
+			TaskDesc: &t,
 		}
 
 		// TODO NEED TO ADD TASK: Task: task

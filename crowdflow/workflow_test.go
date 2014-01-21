@@ -1,7 +1,6 @@
-package crowdflow_test
+package crowdflow
 
 import (
-	. "github.com/abhiyerra/workmachine/crowdflow"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -49,8 +48,8 @@ var _ = Describe("Workflow", func() {
 				Expect(len(batch.MetaJobs)).To(Equal(len(tasks)))
 
 				for _, m := range batch.MetaJobs {
-					Expect(m.Title).To(Equal("Research the fields"))
-					Expect(m.Description).To(Equal("Research the person."))
+					Expect(m.TaskDesc.Title).To(Equal("Research the fields"))
+					Expect(m.TaskDesc.Description).To(Equal("Research the person."))
 				}
 			})
 

@@ -1,10 +1,8 @@
-package crowdflow_test
+package crowdflow
 
 import (
-	. "github.com/abhiyerra/workmachine/crowdflow"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
 	//	"net/http/httptest"
 	//"fmt"
 	"testing"

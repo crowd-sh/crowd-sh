@@ -5,8 +5,7 @@ import (
 )
 
 type MetaJob struct {
-	Title        string     `json:"title"`
-	Description  string     `json:"description"`
+	TaskDesc     *TaskDesc  `json:"task_desc"`
 	InputFields  []JobField `json:"input_fields"`
 	OutputFields []JobField `json:"-"`
 	Jobs         []Job      `json:"-"`

@@ -1,4 +1,4 @@
-package crowdflow_test
+package crowdflow
 
 // import (
 // 	. "github.com/abhiyerra/workmachine/crowdflow"
