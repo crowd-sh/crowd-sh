@@ -1,37 +1,34 @@
 package crowdflow
 
 import (
-	//	"encoding/xml"
 	"fmt"
 	"github.com/crowdmob/goamz/aws"
 	"github.com/crowdmob/goamz/exp/mturk"
+	"log"
+	"sync"
 	"time"
 )
 
-type MTurkServe struct{}
-
-func (m MTurkServe) Execute(jobs chan MetaJob, j MetaJob) {
-	assignment := &MTurkAssignment{
-		JobsChan: jobs,
-		Job:      j,
+func NewMTurkAssigner(assignDone chan bool, a *Assignment) {
+	ma := MTurkAssignment{
+		Assignment: a,
 	}
 
-	assignment.Create()
-	mturk_assignments = append(mturk_assignments, assignment)
-
-	assignment.Poll()
+	ma.Create()
+	go ma.Poll()
 }
 
 type MTurkAssignment struct {
-	Assignment
-	JobsChan chan MetaJob
-	Job      MetaJob
-	Hit      *mturk.HIT
+	SharedAssignment
+
+	Assignment *Assignment
+	Hit        *mturk.HIT
 }
 
 var (
 	mturk_assignments MTurkAssignments
 	mturk_auth        *mturk.MTurk
+	mturk_mutex       sync.RWMutex
 )
 
 type MTurkAssignments []*MTurkAssignment
@@ -43,22 +40,30 @@ func (assign *MTurkAssignment) Create() {
 <html>
  <head>
   <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
+  <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
   <script type='text/javascript' src='https://s3.amazonaws.com/mturk-public/externalHIT_v1.js'></script>
  </head>
  <body>
-  <form name='mturk_form' method='post' id='mturk_form' action='https://www.mturk.com/mturk/externalSubmit'>
-  <input type='hidden' value='' name='assignmentId' id='assignmentId'/>
+  <div class="container">
+    <h1>%s</h1>
+
+    <div>
+      %s
+    </div>
+    <form name='mturk_form' method='post' id='mturk_form' action='https://www.mturk.com/mturk/externalSubmit'>
+    <input type='hidden' value='' name='assignmentId' id='assignmentId'/>
 %s
 
 %s
-  </form>
-  <script language='Javascript'>turkSetAssignmentID();</script>
+    </form>
+   </div>
+   <script language='Javascript'>turkSetAssignmentID();</script>
  </body>
 </html>
 ]]>`
 
 	input_html := ""
-	for _, inp := range assign.Job.InputFields {
+	for _, inp := range assign.Assignment.Job.InputFields {
 		input_html += "<div class=form-group>\n"
 		input_html += fmt.Sprintf("<label>%s</label><br>\n", inp.Description)
 		switch inp.Type {
@@ -71,7 +76,7 @@ func (assign *MTurkAssignment) Create() {
 	}
 
 	output_html := ""
-	for _, out := range assign.Job.OutputFields {
+	for _, out := range assign.Assignment.Job.OutputFields {
 		output_html += "<div class=form-group>\n"
 		output_html += fmt.Sprintf("<label>%s</label>\n", out.Description)
 		switch out.Type {
@@ -85,19 +90,19 @@ func (assign *MTurkAssignment) Create() {
 
 	output_html += `<input type=submit value=Submit class="btn btn-default" />`
 
-	html_question := fmt.Sprintf(html_question_template, input_html, output_html)
+	html_question := fmt.Sprintf(html_question_template, assign.Assignment.Job.TaskDesc.Title, assign.Assignment.Job.TaskDesc.Description, input_html, output_html)
 
 	hit, err := mturk_auth.CreateHIT(
-		assign.Job.TaskDesc.Title,
-		assign.Job.TaskDesc.Description,
+		assign.Assignment.Job.TaskDesc.Title,
+		assign.Assignment.Job.TaskDesc.Description,
 		mturk.HTMLQuestion{
 			HTMLContent: mturk.HTMLContent{html_question},
 			FrameHeight: 1000,
 		},
-		mturkPrice(assign.Job.TaskDesc.Price),
+		mturkPrice(assign.Assignment.Job.TaskDesc.Price),
 		100,
 		200,
-		assign.Job.TaskDesc.Tags,
+		assign.Assignment.Job.TaskDesc.Tags,
 		5,
 		nil,
 		"",
@@ -105,7 +110,7 @@ func (assign *MTurkAssignment) Create() {
 
 	assign.Hit = hit
 
-	fmt.Printf("%v", hit)
+	fmt.Printf("%v", assign.Hit)
 
 	if err != nil {
 		panic(err)
@@ -132,12 +137,21 @@ func (a *MTurkAssignment) Poll() {
 
 		fmt.Printf("No assignment yet\n")
 
-		if assignment_resp.GetAssignmentsForHITResult.TotalNumResults > 0 {
-			mturk_assignment := assignment_resp.GetAssignmentsForHITResult.Assignment
+		if assignment_resp.AssignmentStatus == "Submitted" {
+			answers := assignment_resp.Answers()
+			log.Printf("Answer: %s", answers)
 
-			fmt.Printf("Answer: %s", mturk_assignment.Answer)
+			for i, out := range a.Assignment.Job.OutputFields {
+				if v, ok := answers[out.Id]; ok {
+					a.Assignment.Job.OutputFields[i].Value = v
+				}
+			}
 
-			a.JobsChan <- a.Job
+			a.Assignment.Finished = true
+			a.Assignment.AssignDone <- true
+
+			a.Assignment.Job.TaskDesc.Write(a.Assignment.Job)
+
 			break
 		}
 
@@ -146,7 +160,7 @@ func (a *MTurkAssignment) Poll() {
 	}
 }
 
-func MTurkServer(access_key, secret_key string, sandbox bool) {
+func EnableMTurk(access_key, secret_key string, sandbox bool) {
 	auth := aws.Auth{
 		AccessKey: access_key,
 		SecretKey: secret_key,

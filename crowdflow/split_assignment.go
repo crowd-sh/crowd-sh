@@ -1,63 +1,64 @@
 package crowdflow
 
-type SplitHtmlServe struct{}
-
-func (ss SplitHtmlServe) Execute(jobs chan Job, j Job) {
-	assignment := &SplitAssignment{
-		JobsChan: jobs,
-		Job:      j,
-		Assignment: Assignment{
-			Assigned: false,
-			Finished: false,
-		},
-	}
-
-	split_assignments = append(split_assignments, assignment)
-}
-
 type SplitAssignment struct {
-	Assignment
-	JobsChan chan Job `json:"-"`
-	Job      Job      `json:"job"`
+	SharedAssignment
+
+	Assignment     *Assignment
+	AssignmentDone chan bool
+
+	OutputField *JobField `json:"output"`
 }
 
 func (as SplitAssignment) Finish(value string) {
-	as.Mutex.Lock()
-	as.Job.OutputField.Value = value
+	as.SharedAssignment.Mutex.Lock()
 
-	as.Finished = true
-	as.Mutex.Unlock()
+	as.OutputField.Value = value
+	as.SharedAssignment.Finished = true
 
-	as.JobsChan <- as.Job
+	as.SharedAssignment.Mutex.Unlock()
+
+	as.AssignmentDone <- true
 }
 
-type SplitAssignments []*SplitAssignment
+type SplitAssignments []SplitAssignment
 
 var (
-	split_assignments SplitAssignments
+	AvailableSplitAssignments SplitAssignments
 )
 
-func (as SplitAssignments) Get() *SplitAssignment {
-	for _, a := range as {
-		a.Mutex.Lock()
-
-		a.UnassignIfExpired()
-
-		if !a.Assigned && !a.Finished {
-			defer a.Mutex.Unlock()
-			a.Assign()
-			return a
+func GetSplitAssignment() (assign *SplitAssignment) {
+	if len(AvailableSplitAssignments) > 0 {
+		for _, a := range AvailableSplitAssignments {
+			if a.SharedAssignment.TryToAssign() {
+				return &a
+			}
 		}
-		a.Mutex.Unlock()
+	} else {
+		// Create a new split assignment.
+
+		available := AvailableAssignments.GetUnfinished()
+		if available != nil {
+			for _, f := range available.Job.OutputFields {
+				ss := SplitAssignment{
+					Assignment:  available,
+					OutputField: &f,
+				}
+
+				AvailableSplitAssignments = append(AvailableSplitAssignments, ss)
+			}
+
+			return GetSplitAssignment()
+		}
+
 	}
 
 	return nil
 }
 
-func (as SplitAssignments) Find(id string) *SplitAssignment {
-	for _, a := range as {
+func FindSplitAssignment(id string) *SplitAssignment {
+	for _, a := range AvailableSplitAssignments {
 		if a.Id == id {
-			return a
+			return &a
 		}
 	}
 
