@@ -9,6 +9,7 @@ install:
   - go get -v -t ./...
   - go get -v github.com/onsi/ginkgo
   - go get -v github.com/onsi/gomega
+  - go get -v code.google.com/p/go.tools/cmd/cover
   - go install -v github.com/onsi/ginkgo/ginkgo
 
 script: PATH=$HOME/gopath/bin:$PATH ginkgo -r  -i --randomizeAllSpecs --failOnPending --skipMeasurements --cover
