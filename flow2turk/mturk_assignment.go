@@ -168,3 +168,7 @@ func MTurkAuth() *mturk.MTurk {
 
 	return config.mturkAuth
 }
+
+// if config.WithMTurk {
+// 	go NewMTurkAssigner(assignDone, a)
+// }
