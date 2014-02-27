@@ -3,8 +3,6 @@ package crowdflow
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	//	"net/http/httptest"
-	//"fmt"
 	"testing"
 )
 
@@ -18,26 +16,3 @@ func TestCrowdflow(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Crowdflow Suite")
 }
-
-/*
-func TestCrowdflow2(t *testing.T) {
-
-	// serve := HtmlServe{}
-	// //	go HtmlServer()
-
-	// var backend Assigner = serve
-	// NewBatch(research).Run(backend)
-
-	// fmt.Printf("Length of assignments %d", len(assignments))
-	// for _, assign := range assignments {
-	// 	assign.JobsChan <- Job{}
-	// }
-
-	/* CrowdFlow test one
-
-	   - Make sure that the jobs are created
-	   - Make sure that the we can get the assignment.
-	   - Make sure that we can post the assignment
-	* /
-}
-*/

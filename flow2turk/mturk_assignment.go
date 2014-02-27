@@ -5,7 +5,6 @@ import (
 	"github.com/crowdmob/goamz/aws"
 	"github.com/crowdmob/goamz/exp/mturk"
 	"log"
-	"sync"
 	"time"
 )
 
@@ -27,8 +26,6 @@ type MTurkAssignment struct {
 
 var (
 	mturk_assignments MTurkAssignments
-	mturk_auth        *mturk.MTurk
-	mturk_mutex       sync.RWMutex
 )
 
 type MTurkAssignments []*MTurkAssignment
@@ -92,7 +89,7 @@ func (assign *MTurkAssignment) Create() {
 
 	html_question := fmt.Sprintf(html_question_template, assign.Assignment.Job.TaskDesc.Title, assign.Assignment.Job.TaskDesc.Description, input_html, output_html)
 
-	hit, err := mturk_auth.CreateHIT(
+	hit, err := MTurkAuth().CreateHIT(
 		assign.Assignment.Job.TaskDesc.Title,
 		assign.Assignment.Job.TaskDesc.Description,
 		mturk.HTMLQuestion{
@@ -129,7 +126,7 @@ func mturkPrice(price uint) mturk.Price {
 // been updated.
 func (a *MTurkAssignment) Poll() {
 	for {
-		assignment_resp, err := mturk_auth.GetAssignmentsForHIT(a.Hit.HITId)
+		assignment_resp, err := MTurkAuth().GetAssignmentsForHIT(a.Hit.HITId)
 
 		if err != nil {
 			panic(err)
@@ -160,11 +157,14 @@ func (a *MTurkAssignment) Poll() {
 	}
 }
 
-func EnableMTurk(access_key, secret_key string, sandbox bool) {
-	auth := aws.Auth{
-		AccessKey: access_key,
-		SecretKey: secret_key,
+func MTurkAuth() *mturk.MTurk {
+	if config.mturkAuth == nil {
+		config.mturkAuth = mturk.New(aws.Auth{
+			AccessKey: config.AwsAccessKey,
+			SecretKey: config.AwsSecretKey,
+		}, config.AwsSandbox)
+
 	}
 
-	mturk_auth = mturk.New(auth, sandbox)
+	return config.mturkAuth
 }

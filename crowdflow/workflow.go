@@ -53,7 +53,6 @@ func (b *Batch) Run() {
 
 func NewBatch(t TaskDesc) (batch *Batch) {
 	// TODO: Handle more of the task cases.
-
 	tasks := t.Tasks
 
 	batch = &Batch{TaskDesc: t}

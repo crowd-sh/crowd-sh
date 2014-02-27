@@ -53,8 +53,7 @@ func (as Assignments) GetUnfinished() *Assignment {
 }
 
 func (a *Assignment) Execute(b *Batch, assignDone chan bool) {
-	go NewMTurkAssigner(assignDone, a)
-
+	go NewSplitAssigner(assignDone, a)
 	<-assignDone
 
 	b.TaskDesc.Write(a.Job)
