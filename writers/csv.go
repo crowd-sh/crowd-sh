@@ -1,15 +1,16 @@
-package crowdflow
+package writers
 
 import (
 	"encoding/csv"
 	"fmt"
+	"github.com/abhiyerra/workmachine/crowdflow"
 	"os"
 )
 
-func CsvJobWriter(file *os.File) func(j *MetaJob) {
+func Csv(file *os.File) func(j *crowdflow.MetaJob) {
 	writer := csv.NewWriter(file)
 
-	return func(j *MetaJob) {
+	return func(j *crowdflow.MetaJob) {
 		fmt.Printf("%v\n", j)
 
 		var output []string

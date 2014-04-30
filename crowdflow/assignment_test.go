@@ -5,35 +5,60 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Helper", func() {
+var _ = Describe("Assignments", func() {
 	var (
-		assignment Assignment
+		AvailAssignments Assignments
+		EmptyAssignments Assignments
+		Assign1          Assignment
 	)
 
 	BeforeEach(func() {
-		assignment = Assignment{}
+		Assign1 = Assignment{
+			SharedAssignment: SharedAssignment{
+				Assigned: false,
+			},
+		}
+
+		AvailAssignments = append(AvailAssignments, Assign1)
 	})
 
-	Describe("Assign", func() {
-		BeforeEach(func() {
-			assignment.Assign()
+	Describe("GetUnfinished", func() {
+		It("returns an unassigned assignment if available", func() {
+			var Assign *Assignment = AvailAssignments.GetUnfinished()
+			Expect(Assign).To(Equal(&Assign1))
+
+			Assign1.SharedAssignment.Finished = true
+			Assign1.SharedAssignment.Assigned = true
+
+			Expect(AvailableAssignments.GetUnfinished()).To(BeNil())
 		})
 
-		It("has an Id", func() {
-			Expect(assignment.Id).ToNot(BeEmpty())
+		It("returns nil if assignment if unavailable", func() {
+			Expect(EmptyAssignments.GetUnfinished()).To(BeNil())
 		})
 
-		It("is assigned", func() {
-			Expect(assignment.Assigned).To(BeTrue())
+	})
+})
+
+var _ = Describe("Assignment", func() {
+	Describe("NewAssignment", func() {
+		It("adds the assignment to AvailableAssignments", func() {
+			oldLen := len(AvailableAssignments)
+
+			batch := Batch{}
+			meta_job := MetaJob{}
+			assignDone := make(chan bool)
+
+			NewAssignment(assignDone, &batch, &meta_job)
+			Expect(len(AvailableAssignments)).To(Equal(oldLen + 1))
 		})
 	})
 
-	PDescribe("UnassigneIfExpired", func() {
-		It("returns the correct result", func() {
-			// Expect(writer.Header().Get("Content-Type")).To(Equal("application/json"))
-			// Expect(writer.Header().Get("Access-Control-Allow-Origin")).To(Equal("*"))
-			// Expect(writer.Body.String()).To(ContainSubstring("123"))
-		})
+	PDescribe("Execute", func() {
+
 	})
 
+	PDescribe("Finish", func() {
+
+	})
 })

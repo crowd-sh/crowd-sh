@@ -10,12 +10,12 @@ frontend.
 
 * POST /v1/workflow
   :PROPERTIES:
-  :api_key_PARAM: required
-  :address_PARAM: required
-  :title_PARAM: required
-  :tags_PARAM: required
-  :description_PARAM: required
-  :reward_PARAM: required
+  :api_key: param required
+  :address: param required
+  :title: param required
+  :tags: param required
+  :description: param required
+  :reward: param required
   :RESPONSE: { "id" }
   :END:
 

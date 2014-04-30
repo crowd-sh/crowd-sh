@@ -43,11 +43,11 @@ func (b *Batch) Run() {
 	assignDone := make(chan bool)
 
 	for _, j := range b.MetaJobs {
-		NewAssignment(assignDone, b, &j)
+		go NewAssignment(assignDone, b, &j)
 	}
 
 	for i := 0; i < len(b.MetaJobs); i++ {
-		_ = <-assignDone
+		<-assignDone
 	}
 }
 

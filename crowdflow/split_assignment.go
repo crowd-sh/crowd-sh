@@ -1,10 +1,5 @@
 package crowdflow
 
-func NewSplitAssigner(assignDone chan bool, a *Assignment) {
-	<-assignDone
-	// No-op
-}
-
 type SplitAssignment struct {
 	SharedAssignment
 
