@@ -10,7 +10,7 @@ var _ = Describe("Workflow", func() {
 
 	var (
 		tasks    []Research
-		research TaskDesc
+		research TaskConfig
 		batch    *Batch
 	)
 
@@ -20,7 +20,7 @@ var _ = Describe("Workflow", func() {
 			Research{Name: "Leonardo"},
 		}
 
-		research = TaskDesc{
+		research = TaskConfig{
 			Title:       "Research the fields",
 			Description: "Research the person.",
 			Price:       1,
@@ -32,11 +32,11 @@ var _ = Describe("Workflow", func() {
 	})
 
 	Describe("Batch", func() {
-		Describe("TaskDesc", func() {
-			It("has the correct TaskDesc", func() {
-				Expect(batch.TaskDesc.Title).To(Equal("Research the fields"))
-				Expect(batch.TaskDesc.Description).To(Equal("Research the person."))
-				Expect(batch.TaskDesc.Price).To(Equal(uint(1)))
+		Describe("TaskConfig", func() {
+			It("has the correct TaskConfig", func() {
+				Expect(batch.TaskConfig.Title).To(Equal("Research the fields"))
+				Expect(batch.TaskConfig.Description).To(Equal("Research the person."))
+				Expect(batch.TaskConfig.Price).To(Equal(uint(1)))
 			})
 		})
 
@@ -49,8 +49,8 @@ var _ = Describe("Workflow", func() {
 				Expect(len(batch.MetaJobs)).To(Equal(len(tasks)))
 
 				for _, m := range batch.MetaJobs {
-					Expect(m.TaskDesc.Title).To(Equal("Research the fields"))
-					Expect(m.TaskDesc.Description).To(Equal("Research the person."))
+					Expect(m.TaskConfig.Title).To(Equal("Research the fields"))
+					Expect(m.TaskConfig.Description).To(Equal("Research the person."))
 				}
 			})
 

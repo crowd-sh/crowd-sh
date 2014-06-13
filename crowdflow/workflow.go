@@ -12,10 +12,10 @@ const (
 )
 
 /*
- * TaskDesc is a way to define the Job that needs to be run.
+ * TaskConfig is a way to define the Job that needs to be run.
  */
 // work_type: output_image, output_text, input_text
-type TaskDesc struct {
+type TaskConfig struct {
 	Title       string
 	Description string
 	Tags        string
@@ -29,14 +29,14 @@ type TaskDesc struct {
  */
 
 type Batch struct {
-	TaskDesc TaskDesc
-	MetaJobs []MetaJob
+	TaskConfig TaskConfig
+	MetaJobs   []MetaJob
 }
 
 type MetaJob struct {
-	TaskDesc     *TaskDesc  `json:"task_desc"`
-	InputFields  []JobField `json:"input_fields"`
-	OutputFields []JobField `json:"-"`
+	TaskConfig   *TaskConfig `json:"task_desc"`
+	InputFields  []JobField  `json:"input_fields"`
+	OutputFields []JobField  `json:"-"`
 }
 
 func (b *Batch) Run() {
@@ -51,11 +51,11 @@ func (b *Batch) Run() {
 	}
 }
 
-func NewBatch(t TaskDesc) (batch *Batch) {
+func NewBatch(t TaskConfig) (batch *Batch) {
 	// TODO: Handle more of the task cases.
 	tasks := t.Tasks
 
-	batch = &Batch{TaskDesc: t}
+	batch = &Batch{TaskConfig: t}
 
 	if reflect.TypeOf(tasks).Kind() != reflect.Slice {
 		fmt.Println("Wtf kind of shit is this?")
@@ -69,7 +69,7 @@ func NewBatch(t TaskDesc) (batch *Batch) {
 		task := s.Index(i)
 
 		job := MetaJob{
-			TaskDesc: &t,
+			TaskConfig: &t,
 		}
 
 		// TODO NEED TO ADD TASK: Task: task

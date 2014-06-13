@@ -34,5 +34,5 @@ func (as Assignments) GetUnfinished() *Assignment {
 
 func (a Assignment) Finish(val string) {
 
-	// b.TaskDesc.Write(a.Job)
+	// b.TaskConfig.Write(a.Job)
 }

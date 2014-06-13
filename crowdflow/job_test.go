@@ -9,7 +9,7 @@ package crowdflow
 // var _ = Describe("Batch", func() {
 // 	var (
 // 		tasks    []Research
-// 		research TaskDesc
+// 		research TaskConfig
 // 		batch    *Batch
 // 	)
 
@@ -19,7 +19,7 @@ package crowdflow
 // 			Research{Name: "Leonardo"},
 // 		}
 
-// 		research = TaskDesc{
+// 		research = TaskConfig{
 // 			Title:       "Research the fields",
 // 			Description: "Research the person.",
 // 			Price:       1,
