@@ -6,21 +6,6 @@ import (
 	"log"
 )
 
-type Field struct {
-	Id          string
-	Type        string
-	Description string
-	FieldType   string
-}
-
-func (f *Field) GetInputFields() (f []Field) {
-
-}
-
-func (f *Field) GetOutputFields() (f []Field) {
-
-}
-
 type Program struct {
 	Title       string
 	Description string

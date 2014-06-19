@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"github.com/abhiyerra/workmachine/crowdflow"
+	crowdflow "github.com/abhiyerra/workmachine/crowdflow"
 	"log"
 	"os"
 )
