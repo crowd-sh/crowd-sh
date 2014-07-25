@@ -61,7 +61,7 @@ func indexTaskHandler(w http.ResponseWriter, req *http.Request) {
 
 	type Task struct {
 		Id      string `json:"id"`
-		Name    string `json:"name"`
+		Title   string `json:"title"`
 		NumJobs string `json:"num_jobs"`
 		Url     string `json:"url"`
 	}
@@ -73,7 +73,7 @@ func indexTaskHandler(w http.ResponseWriter, req *http.Request) {
 
 		tasks = append(tasks, Task{
 			Id:      taskId,
-			Name:    task["name"],
+			Title:   task["title"],
 			NumJobs: task["num_jobs"],
 			Url:     task["url"],
 		})

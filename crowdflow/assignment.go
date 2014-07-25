@@ -12,26 +12,28 @@ const (
 )
 
 type Assignment struct {
-	Assigned   bool         `json:"-"`
+	Assigned   bool         `json:"assigned"`
 	Id         string       `json:"id"`
 	StartedAt  time.Time    `json:"started_at"`
 	Mutex      sync.RWMutex `json:"-"`
-	Finished   bool         `json:"-"`
+	Finished   bool         `json:"finished"`
 	AssignDone chan bool    `json:"-"`
-	// Job        *MetaJob  `json:"job"`
+	Value      string       `json:"-"`
+	Job        *Job         `json:"job"`
+	InputField *JobField    `json:"input_field"`
 }
 
-func (a *SharedAssignment) generateId() string {
+func (a *Assignment) generateId() string {
 	return fmt.Sprintf("%x", string(securecookie.GenerateRandomKey(128)))
 }
 
-func (a *SharedAssignment) Assign() {
+func (a *Assignment) Assign() {
 	a.Assigned = true
 	a.Id = a.generateId()
 	a.StartedAt = time.Now()
 }
 
-func (a *SharedAssignment) TryToAssign() bool {
+func (a *Assignment) TryToAssign() bool {
 	a.Mutex.Lock()
 	defer a.Mutex.Unlock()
 
@@ -46,7 +48,7 @@ func (a *SharedAssignment) TryToAssign() bool {
 	return false
 }
 
-func (a *SharedAssignment) UnassignIfExpired() {
+func (a *Assignment) UnassignIfExpired() {
 	duration := time.Since(a.StartedAt) / time.Minute
 	if duration > ExpireAfterMinutes { // Greater than 5 minutes
 		a.Assigned = false
@@ -54,24 +56,44 @@ func (a *SharedAssignment) UnassignIfExpired() {
 	}
 }
 
-type Assignments []Assignment
+func (a *Assignment) Finish(value string) {
+	a.Mutex.Lock()
+	a.Value = value
+	a.Finished = true
+	a.Mutex.Unlock()
 
-var (
-	AvailableAssignments Assignments
-)
+	a.AssignDone <- true
+}
 
-func NewAssignment(assignDone chan bool, b *Program, j *MetaJob) {
+func (a *Assignment) Run() {
+	select {
+	// case res := <-c1:
+	// 	fmt.Println(res)
+	case <-time.After(time.Minute * ExpireAfterMinutes):
+		a.UnassignIfExpired()
+	}
+}
+
+func NewAssignment(assignDone chan bool, j *Job, jf *JobField) {
 	assignment := Assignment{
-		AssignDone: assignDone,
 		Job:        j,
+		InputField: jf,
+		AssignDone: assignDone,
+		Finished:   false,
+		Assigned:   false,
 	}
 
 	AvailableAssignments = append(AvailableAssignments, assignment)
 }
 
+type Assignments []Assignment
+
 func (as Assignments) GetUnfinished() *Assignment {
-	for _, a := range as {
-		if !a.SharedAssignment.Finished && !a.SharedAssignment.Assigned {
+	for i := range as {
+		a := as[i]
+
+		if !a.Finished && !a.Assigned {
+			fmt.Println(a.Id)
 			return &a
 		}
 	}
@@ -79,7 +101,12 @@ func (as Assignments) GetUnfinished() *Assignment {
 	return nil
 }
 
-func (a Assignment) Finish(val string) {
+func (as Assignments) Find(id string) *Assignment {
+	for _, a := range as {
+		if a.Id == id {
+			return &a
+		}
+	}
 
-	// b.TaskConfig.Write(a.Job)
+	return nil
 }

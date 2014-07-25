@@ -12,24 +12,29 @@ var (
 )
 
 func init() {
+	flag.Parse()
+}
+
+func main() {
 	log.Println("CrowdFlow Starting...")
 
-	flag.Parse()
-
 	args := flag.Args()
-	if len(args) < 1 {
-		log.Println("Crowdflow program file is missing.")
+	if len(args) < 2 {
+		log.Println("Crowdflow program file and data csv are missing.")
 		os.Exit(1)
 	}
 
-	jsonStream, err := os.Open(args[0])
+	jsonProgram, err := os.Open(args[0])
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	Program = crowdflow.ParseProgram(jsonStream)
-}
+	csvFile, err := os.Open(args[1])
+	if err != nil {
+		log.Fatal(err)
+	}
 
-func main() {
+	Program = crowdflow.ParseProgram(jsonProgram)
+	Program.LoadJobs(csvFile)
 	Program.Run()
 }

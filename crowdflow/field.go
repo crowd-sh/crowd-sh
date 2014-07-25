@@ -4,8 +4,8 @@ type FieldType string
 type InputType string
 
 const (
-	InputFieldType  FieldType = "input"
-	OutputFieldType FieldType = "output"
+	InputFieldType  FieldType = "InputField"
+	OutputFieldType FieldType = "OutputField"
 )
 
 const (
@@ -21,4 +21,34 @@ type Field struct {
 	InputType   InputType
 	Value       string
 	Description string
+}
+
+func (f *Field) IsOutputField() bool {
+	return f.Type == OutputFieldType
+}
+
+func (f *Field) IsInputField() bool {
+	return f.Type == InputFieldType
+}
+
+type Fields []Field
+
+func (fs Fields) Get(id string) *Field {
+	for i := range fs {
+		if fs[i].Id == id {
+			return &fs[i]
+		}
+	}
+
+	return nil
+}
+
+func (fs Fields) OutputFields() (ofs []*Field) {
+	for i, f := range fs {
+		if f.IsOutputField() {
+			ofs = append(ofs, &fs[i])
+		}
+	}
+
+	return
 }
