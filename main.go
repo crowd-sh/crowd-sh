@@ -1,8 +1,8 @@
 package main
 
 import (
+	crowdflow "./crowdflow"
 	"flag"
-	crowdflow "github.com/abhiyerra/workmachine/crowdflow"
 	"log"
 	"os"
 )
