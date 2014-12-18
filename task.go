@@ -1,4 +1,4 @@
-package crowdflow
+package main
 
 import (
 	"time"

@@ -1,4 +1,4 @@
-package crowdflow
+package main
 
 type FieldType string
 type InputType string

@@ -1,4 +1,4 @@
-package crowdflow
+package main
 
 type Worker struct {
 }
