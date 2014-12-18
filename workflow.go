@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/csv"
-	"encoding/json"
-	"github.com/gorilla/mux"
+	//	"encoding/json"
+	//	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 )
@@ -30,6 +30,8 @@ func (w Work) CreateAssignments() {
 }
 
 func (w Work) IsFinished() {
+	var assignments []Assignment
+	Db.Model(Assignment{}).Where("work_id = ?", w.Id).Find(&assignments)
 	// See if all the assignments are done
 }
 
@@ -109,7 +111,7 @@ func (w Work) IsFinished() {
 func NewFlow(workflow string, csv *csv.Reader) {
 	// Read the CSV file
 
-	rows, err := csv.ReadAll()
+	rows, err := csv.Read()
 	if err != nil {
 		log.Println(err)
 		return
@@ -117,10 +119,10 @@ func NewFlow(workflow string, csv *csv.Reader) {
 
 	for i := range rows {
 		w := Work{
-			Workflow: workflow,
-			Data:     rows[i],
+			WorkflowRaw: workflow,
+			DataRaw:     rows[i],
 		}
-		Db.Model(Work{}).Create()
+		Db.Create(&w)
 
 		go w.CreateAssignments()
 	}
@@ -128,18 +130,18 @@ func NewFlow(workflow string, csv *csv.Reader) {
 }
 
 func NewWorkflowsHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
+	//	vars := mux.Vars(r)
 
-	for key, _ := range r.Form {
-		log.Println(key)
-		//LOG: {"test": "that"}
-		err := json.Unmarshal([]byte(key), &t)
-		if err != nil {
-			log.Println(err.Error())
-		}
-	}
+	// for key, _ := range r.Form {
+	// 	log.Println(key)
+	// 	//LOG: {"test": "that"}
+	// 	err := json.Unmarshal([]byte(key), &t)
+	// 	if err != nil {
+	// 		log.Println(err.Error())
+	// 	}
+	// }
 
-	NewFlow()
+	// NewFlow()
 
 	// workflow := NewWorkflow("Json")
 	// Db.Create(&workflow)

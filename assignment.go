@@ -11,14 +11,16 @@ const (
 )
 
 type Assignment struct {
-	Id         string    `json:"id"`
-	Assigned   bool      `json:"assigned"`
-	StartedAt  time.Time `json:"started_at"`
-	Finished   bool      `json:"finished"`
-	AssignDone chan bool `json:"-"`
-	Value      string    `json:"-"`
-	//	Job        *Job      `json:"job"`
-	//	InputField *JobField `json:"input_field"`
+	Id        string    `json:"id"`
+	Assigned  bool      `json:"assigned"`
+	StartedAt time.Time `json:"started_at"`
+	Finished  bool      `json:"finished"`
+	Value     string    `json:"-"`
+	Status    string    `json:"status"`
+}
+
+func (a Assignment) Abandon() {
+	// TODO: Mark the current task as abandoned and create a new assignment.
 }
 
 // func (a *Assignment) generateId() string {
@@ -109,7 +111,12 @@ type Assignment struct {
 // 	return nil
 // }
 
-// func ExpireAssignments() {
+// Iterate over the assignments and expire the ones which are over 5 minutes.
+func AssignmentExpirer() {
+	for {
+		Db.Model(Assignment{}).Where("started_at > (current_timestamp - interval '5' minute)").
+			Update(Assignment{Status: "unassigned"})
 
-// 	// TODO: Iterate over the assignments and expire the ones which are over 5 minutes.
-// }
+		time.Sleep(ExpireAfterMinutes * time.Minute)
+	}
+}

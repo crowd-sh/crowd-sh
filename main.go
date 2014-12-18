@@ -46,7 +46,8 @@ func init() {
 }
 
 func main() {
-	// go WorkExpirer()
+	go AssignmentExpirer()
+
 	log.Println("WorkMachine Starting...")
 
 	r := mux.NewRouter()
@@ -89,6 +90,5 @@ func main() {
 		http.ServeFile(w, r, r.URL.Path[1:])
 	})
 	http.Handle("/", r)
-	http.ListenAndServe(":3001", nil)
-
+	http.ListenAndServe(":3002", nil)
 }
