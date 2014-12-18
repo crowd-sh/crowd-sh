@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html ng-app="workmachine">
+  <head>
+    <title>WorkMachine - {{title}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="google-site-verification" content="NQresi8URxXlLKDMpO_pjLDzaUI2r5ptxGkB7dd22tk" />
+
+    <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript" src="//use.typekit.net/xtt6pxa.js"></script>
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-route.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-touch.js"></script>
+
+    <script src="js/app.js"></script>
+
+    <style type="text/css" media="screen">
+     h1, h2, h3, h4, p, label, div {
+       font-family: "proxima-nova",sans-serif;
+     }
+    </style>
+
+    <script>
+     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                              })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+     ga('create', 'UA-46775334-1', 'workmachine.us');
+     ga('send', 'pageview');
+
+    </script>
+  </head>
+
+  <body>
+    <div class="container">
+      <main ng-view></main>
+    </div>
+  </body>
+</html>
