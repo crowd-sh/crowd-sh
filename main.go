@@ -9,7 +9,6 @@ import (
 )
 
 func init() {
-	flag.StringVar(&crowdflow.Port, "port", "3000", "Port")
 	flag.Parse()
 
 	// Db, _ := gorm.Open("postgres", "user=gorm dbname=gorm sslmode=disable")
