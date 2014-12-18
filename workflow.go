@@ -1,29 +1,37 @@
 package main
 
-// import (
-// 	// "encoding/csv"
-// 	"encoding/json"
-// 	"log"
-// 	"strings"
-// 	// "strconv"
-// )
+import (
+	"encoding/csv"
+	"encoding/json"
+	"github.com/gorilla/mux"
+	"log"
+	"net/http"
+)
 
-// type Workflow struct {
-// 	Id          int64
-// 	UserId      int64
-// 	ProgramJson string
-// 	Tasks       []Task
+type Workflow struct {
+	Title        string        `json:"title"`
+	Description  string        `json:"description"`
+	Tags         string        `json:"tags"`
+	Url          string        `json:"url"`
+	InputFields  []InputField  `json:"input_fields"`
+	OutputFields []OutputField `json:"output_fields"`
+}
 
-// 	Program struct {
-// 		Title       string
-// 		Description string
-// 		Price       int
-// 		Tags        string
-// 		Url         string
+type Work struct {
+	Id          int64
+	WorkflowRaw string `sql:"workflow"`
+	DataRaw     string `sql:"data"`
+	Notes       string
+}
 
-// 		Fields Fields
-// 	} `sql:"-"`
-// }
+func (w Work) CreateAssignments() {
+	// Find all input fields.
+	// For each input field create an assignment
+}
+
+func (w Work) IsFinished() {
+	// See if all the assignments are done
+}
 
 // func NewWorkflow(program string) (m Workflow) {
 // 	m = Workflow{ProgramJson: program}
@@ -97,3 +105,69 @@ package main
 
 // // // 	return
 // // // }
+
+func NewFlow(workflow string, csv *csv.Reader) {
+	// Read the CSV file
+
+	rows, err := csv.ReadAll()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	for i := range rows {
+		w := Work{
+			Workflow: workflow,
+			Data:     rows[i],
+		}
+		Db.Model(Work{}).Create()
+
+		go w.CreateAssignments()
+	}
+
+}
+
+func NewWorkflowsHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	for key, _ := range r.Form {
+		log.Println(key)
+		//LOG: {"test": "that"}
+		err := json.Unmarshal([]byte(key), &t)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}
+
+	NewFlow()
+
+	// workflow := NewWorkflow("Json")
+	// Db.Create(&workflow)
+}
+
+func ShowWorkflowsHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+// func newTaskHandler(w http.ResponseWriter, req *http.Request) {
+// 	for _, name := range []string{"name", "num_jobs", "url"} {
+// 		if req.FormValue(name) == "" {
+// 			renderJson(w, fmt.Sprintf("error: Need value %s", name))
+// 			return
+// 		}
+// 	}
+
+// 	task := Task{
+// 		Name:      req.FormValue("name"),
+// 		NumJobs:   req.FormValue("num_jobs"),
+// 		Url:       req.FormValue("url"),
+// 		CreatedAt: time.Now(),
+// 	}
+// 	task.GenerateId()
+
+// 	tasks = append(tasks, task)
+
+// 	log.Println("New Task", task.Id, req.FormValue("name"), req.FormValue("num_jobs"), req.FormValue("url"))
+
+// 	fmt.Fprintln(w, task.Id)
+// }

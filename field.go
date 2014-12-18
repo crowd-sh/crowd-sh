@@ -1,54 +1,23 @@
 package main
 
-type FieldType string
-type InputType string
-
 const (
-	InputFieldType  FieldType = "InputField"
-	OutputFieldType FieldType = "OutputField"
+	LongTextType = "long_text"
+	ImageType    = "image"
+	HiddenType   = "hidden"
+	CheckBoxType = "checkbox"
 )
 
-const (
-	LongTextType InputType = "long_text"
-	ImageType    InputType = "image"
-	HiddenType   InputType = "hidden"
-	CheckBoxType InputType = "checkbox"
-)
-
-type Field struct {
-	Id          string
-	Type        FieldType
-	InputType   InputType
-	Value       string
-	Description string
+type InputField struct {
+	Id          string `json:"id"`
+	Type        string `json:"type"`
+	Value       string `json:"value"`
+	Description string `json:"description"`
 }
 
-func (f *Field) IsOutputField() bool {
-	return f.Type == OutputFieldType
-}
-
-func (f *Field) IsInputField() bool {
-	return f.Type == InputFieldType
-}
-
-type Fields []Field
-
-func (fs Fields) Get(id string) *Field {
-	for i := range fs {
-		if fs[i].Id == id {
-			return &fs[i]
-		}
-	}
-
-	return nil
-}
-
-func (fs Fields) OutputFields() (ofs []*Field) {
-	for i, f := range fs {
-		if f.IsOutputField() {
-			ofs = append(ofs, &fs[i])
-		}
-	}
-
-	return
+type OutputField struct {
+	Id          string `json:"id"`
+	Type        string `json:"type"`
+	Value       string `json:"value"`
+	Description string `json:"description"`
+	Validation  string `json:"validation"`
 }
