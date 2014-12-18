@@ -1,2 +1,2 @@
-cd /code
+go build .
 ./workmachine

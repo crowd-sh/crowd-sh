@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -12,8 +11,8 @@ import (
 // - [ ] Check to make sure api key exists
 // - [ ] Create a new entry in the Database
 func newWorkflowHandler(w http.ResponseWriter, r *http.Request) {
-	workflow := NewWorkflow("Json")
-	Db.Create(&workflow)
+	// workflow := NewWorkflow("Json")
+	// Db.Create(&workflow)
 
 	// args := flag.Args()
 	// if len(args) < 2 {
@@ -102,5 +101,5 @@ func StartServer() {
 		http.ServeFile(w, r, r.URL.Path[1:])
 	})
 	http.Handle("/", r)
-	http.ListenAndServe(fmt.Sprintf(":%s", Port), nil)
+	http.ListenAndServe(":3001", nil)
 }
