@@ -1,23 +1,49 @@
 package main
 
 import (
-	"flag"
+	"github.com/coreos/go-etcd/etcd"
 	"github.com/jinzhu/gorm"
-	// _ "github.com/lib/pq"
-	_ "github.com/mattn/go-sqlite3"
-	crowdflow "github.com/workmachine/workmachine/crowdflow"
+	_ "github.com/lib/pq"
+	"log"
+	"os"
 )
 
+const (
+	DatabaseUrlKey = "/workmachine/database_url"
+)
+
+var (
+	db gorm.DB
+)
+
+func dbConnect(databaseUrl string) {
+	log.Println("Connecting to database:", databaseUrl)
+	var err error
+	db, err = gorm.Open("postgres", databaseUrl)
+	if err != nil {
+		log.Println(err)
+	}
+	db.LogMode(true)
+}
+
 func init() {
-	flag.Parse()
+	etcdHosts := os.Getenv("ETCD_HOSTS")
+	if etcdHosts == "" {
+		etcdHosts = "http://127.0.0.1:4001"
+	}
 
-	// Db, _ := gorm.Open("postgres", "user=gorm dbname=gorm sslmode=disable")
-	Db, _ := gorm.Open("sqlite3", "gorm.db")
-	crowdflow.Db = Db
+	etcdClient := etcd.NewClient([]string{etcdHosts})
 
-	crowdflow.BuildDb()
+	resp, err := etcdClient.Get(DatabaseUrlKey, false, false)
+	if err != nil {
+		panic(err)
+	}
+
+	databaseUrl := resp.Node.Value
+	dbConnect(databaseUrl)
 }
 
 func main() {
-	crowdflow.StartServer()
+	// go WorkExpirer()
+	StartServer()
 }
