@@ -9,19 +9,15 @@ be good so we can send it to a human to verify. The human input can
 then be used to train the OCR algorithm. The engine is generic enough
 to define arbitrary workflows which require human workers.
 
-## Usage
-
-Please take a look in the examples directory for different usages.
-
 ## Documentation
 
 Check out the wiki for more information.
 
-     https://github.com/abhiyerra/workmachine/wiki
+     https://github.com/workmachine/workmachine/wiki
 
 ## License
 
-Copyright (C) 2012 Abhi Yerra <abhi@berkeley.edu>
+Copyright (C) 2012-2015 Abhi Yerra <abhi@berkeley.edu>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

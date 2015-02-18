@@ -51,13 +51,55 @@ func main() {
 	log.Println("WorkMachine Starting...")
 
 	r := mux.NewRouter()
-	r.HandleFunc("/v1/work", NewWorkflowsHandler).Methods("PUT")
-	r.HandleFunc("/v1/work/{workflow}", ShowWorkflowsHandler).Methods("GET")
+	r.HandleFunc("/v1/workflow", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
 
-	//r.HandleFunc("/v1/workflow/{workflow}/tasks", TaskHandler).Methods("PUT")
+		for key, _ := range r.Form {
+			log.Println(key)
+			err := json.Unmarshal([]byte(key), &t)
+			if err != nil {
+				log.Println(err.Error())
+			}
+		}
+
+		workflow := NewWorkflow("Json")
+	}).Methods("POST")
+
+	r.HandleFunc("/v1/workflow/{workflow}", func(w http.ResponseWriter, r *http.Request) {
+
+	}).Methods("GET")
+
+	r.HandleFunc("/v1/workflow/{workflow}/tasks", func(w http.ResponseWriter, r *http.Request) {
+		// func newTaskHandler(w http.ResponseWriter, req *http.Request) {
+		// 	for _, name := range []string{"name", "num_jobs", "url"} {
+		// 		if req.FormValue(name) == "" {
+		// 			renderJson(w, fmt.Sprintf("error: Need value %s", name))
+		// 			return
+		// 		}
+		// 	}
+
+		// 	task := Task{
+		// 		Name:      req.FormValue("name"),
+		// 		NumJobs:   req.FormValue("num_jobs"),
+		// 		Url:       req.FormValue("url"),
+		// 		CreatedAt: time.Now(),
+		// 	}
+		// 	task.GenerateId()
+
+		// 	tasks = append(tasks, task)
+
+		// 	log.Println("New Task", task.Id, req.FormValue("name"), req.FormValue("num_jobs"), req.FormValue("url"))
+
+		// 	fmt.Fprintln(w, task.Id)
+		// }
+
+	}).Methods("POST")
+
+	r.HandleFunc("/v1/workflow/{workflow}/tasks/{tasks}", func(w http.ResponseWriter, r *http.Request) {
+
+	}).Methods("GET")
+
 	//r.HandleFunc("/v1/workflow/{workflow}/tests", TaskHandler).Methods("PUT")
-	//r.HandleFunc("/v1/tasks", newTaskHandler).Methods("POST")
-	//r.HandleFunc("/v1/assignments", newTaskHandler).Methods("POST")
 
 	// r.HandleFunc("/v1/assignments", func(w http.ResponseWriter, req *http.Request) {
 	// 	assign := AvailableAssignments.GetUnfinished()
