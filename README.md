@@ -9,6 +9,16 @@ be good so we can send it to a human to verify. The human input can
 then be used to train the OCR algorithm. The engine is generic enough
 to define arbitrary workflows which require human workers.
 
+## Usage
+
+### Create Workflow
+
+curl -X POST -H "Content-Type: application/json" -d @british_library_tag.json localhost:3002/v1/workflows
+
+### Create New Task
+
+curl -X POST -H "Content-Type: application/json" -d @sample.json localhost:3002/v1/workflows/5/tasks
+
 ## Documentation
 
 Check out the wiki for more information.

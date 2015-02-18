@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"github.com/coreos/go-etcd/etcd"
+	"github.com/crowdmob/goamz/aws"
+	"github.com/crowdmob/goamz/exp/mturk"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
@@ -15,7 +18,8 @@ const (
 )
 
 var (
-	Db gorm.DB
+	Db    gorm.DB
+	MTurk mturk.MTurk
 )
 
 func dbConnect(databaseUrl string) {
@@ -26,6 +30,11 @@ func dbConnect(databaseUrl string) {
 		log.Println(err)
 	}
 	Db.LogMode(true)
+}
+
+func mturkConnect() {
+	auth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
+	MTurk = mturk.New(auth, true)
 }
 
 func init() {
@@ -46,56 +55,33 @@ func init() {
 }
 
 func main() {
-	go AssignmentExpirer()
+	//	go AssignmentExpirer()
 
 	log.Println("WorkMachine Starting...")
 
 	r := mux.NewRouter()
-	r.HandleFunc("/v1/workflow", func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-
-		for key, _ := range r.Form {
-			log.Println(key)
-			err := json.Unmarshal([]byte(key), &t)
-			if err != nil {
-				log.Println(err.Error())
-			}
-		}
-
-		workflow := NewWorkflow("Json")
+	r.HandleFunc("/v1/workflows", func(w http.ResponseWriter, r *http.Request) {
+		workflow := NewWorkflow(r.Body)
+		fmt.Fprintln(w, workflow.Id)
 	}).Methods("POST")
 
-	r.HandleFunc("/v1/workflow/{workflow}", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/workflows/{workflow}", func(w http.ResponseWriter, r *http.Request) {
 
 	}).Methods("GET")
 
-	r.HandleFunc("/v1/workflow/{workflow}/tasks", func(w http.ResponseWriter, r *http.Request) {
-		// func newTaskHandler(w http.ResponseWriter, req *http.Request) {
-		// 	for _, name := range []string{"name", "num_jobs", "url"} {
-		// 		if req.FormValue(name) == "" {
-		// 			renderJson(w, fmt.Sprintf("error: Need value %s", name))
-		// 			return
-		// 		}
-		// 	}
+	r.HandleFunc("/v1/workflows/{workflow}/tasks", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
 
-		// 	task := Task{
-		// 		Name:      req.FormValue("name"),
-		// 		NumJobs:   req.FormValue("num_jobs"),
-		// 		Url:       req.FormValue("url"),
-		// 		CreatedAt: time.Now(),
-		// 	}
-		// 	task.GenerateId()
+		workflow := Workflow{}
+		Db.First(&workflow, vars["workflow"])
+		workflow.Parse()
 
-		// 	tasks = append(tasks, task)
+		t := workflow.AddTask(r.Body)
 
-		// 	log.Println("New Task", task.Id, req.FormValue("name"), req.FormValue("num_jobs"), req.FormValue("url"))
-
-		// 	fmt.Fprintln(w, task.Id)
-		// }
-
+		fmt.Fprintln(w, t.Id)
 	}).Methods("POST")
 
-	r.HandleFunc("/v1/workflow/{workflow}/tasks/{tasks}", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/v1/workflows/{workflow}/tasks/{tasks}", func(w http.ResponseWriter, r *http.Request) {
 
 	}).Methods("GET")
 

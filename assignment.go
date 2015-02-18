@@ -1,27 +1,27 @@
 package main
 
-import (
-	// "fmt"
-	// "github.com/gorilla/securecookie" // TODO: Deprecate this
-	"time"
-)
+// import (
+// 	// "fmt"
+// 	// "github.com/gorilla/securecookie" // TODO: Deprecate this
+// 	"time"
+// )
 
-const (
-	ExpireAfterMinutes = 5
-)
+// const (
+// 	ExpireAfterMinutes = 5
+// )
 
-type Assignment struct {
-	Id        string    `json:"id"`
-	Assigned  bool      `json:"assigned"`
-	StartedAt time.Time `json:"started_at"`
-	Finished  bool      `json:"finished"`
-	Value     string    `json:"-"`
-	Status    string    `json:"status"`
-}
+// type Assignment struct {
+// 	Id        string    `json:"id"`
+// 	Assigned  bool      `json:"assigned"`
+// 	StartedAt time.Time `json:"started_at"`
+// 	Finished  bool      `json:"finished"`
+// 	Value     string    `json:"-"`
+// 	Status    string    `json:"status"`
+// }
 
-func (a Assignment) Abandon() {
-	// TODO: Mark the current task as abandoned and create a new assignment.
-}
+// func (a Assignment) Abandon() {
+// 	// TODO: Mark the current task as abandoned and create a new assignment.
+// }
 
 // func (a *Assignment) generateId() string {
 // 	return fmt.Sprintf("%x", string(securecookie.GenerateRandomKey(128)))
@@ -112,11 +112,11 @@ func (a Assignment) Abandon() {
 // }
 
 // Iterate over the assignments and expire the ones which are over 5 minutes.
-func AssignmentExpirer() {
-	for {
-		Db.Model(Assignment{}).Where("started_at > (current_timestamp - interval '5' minute)").
-			Update(Assignment{Status: "unassigned"})
+// func AssignmentExpirer() {
+// 	for {
+// 		Db.Model(Assignment{}).Where("started_at > (current_timestamp - interval '5' minute)").
+// 			Update(Assignment{Status: "unassigned"})
 
-		time.Sleep(ExpireAfterMinutes * time.Minute)
-	}
-}
+// 		time.Sleep(ExpireAfterMinutes * time.Minute)
+// 	}
+// }

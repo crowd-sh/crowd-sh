@@ -1,63 +1,63 @@
 package main
 
 import (
-	//	"encoding/json"
+	"encoding/json"
+	"io"
+	"io/ioutil"
 	"log"
 )
 
+const (
+	LongTextType = "long_text"
+	ImageType    = "image"
+	HiddenType   = "hidden"
+	CheckBoxType = "checkbox"
+)
+
+type InputField struct {
+	Id          string `json:"id"`
+	Type        string `json:"field_type"`
+	Value       string `json:"value"`
+	Description string `json:"description"`
+}
+
+type OutputField struct {
+	Id          string `json:"id"`
+	Type        string `json:"field_type"`
+	Value       string `json:"value"`
+	Description string `json:"description"`
+	Validation  string `json:"validation"`
+}
+
 type Workflow struct {
-	Id           int64
+	Id           int64         `json:"id"`
 	Title        string        `json:"title"`
 	Description  string        `json:"description"`
 	Tags         string        `json:"tags"`
 	Url          string        `json:"url"`
+	Price        int           `json:"price"`
 	InputFields  []InputField  `json:"input_fields"`
 	OutputFields []OutputField `json:"output_fields"`
-	rawData      string        `json:"-"`
+	RawData      string        `json:"-"`
 }
 
-func (w Workflow) AddTask(taskJson string) {
-	// Find all input fields.
-	// For each input field create an assignment
-
-	jobData := csv.NewReader(csvFile)
-
-	records, err := jobData.ReadAll()
+func (w *Workflow) AddTask(task io.ReadCloser) (t Task) {
+	body, err := ioutil.ReadAll(task)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
-	for _, row := range records {
-		newJob := Job{}
-
-		// Assign the input fields
-		for rowNum, rowFieldId := range p.CsvConfig {
-			field := p.Fields.Get(rowFieldId)
-			if field == nil {
-				log.Fatal("Can't load field", rowFieldId)
-			}
-
-			i, _ := strconv.Atoi(rowNum)
-
-			log.Println(row[i])
-			newJob.InputFields = append(newJob.InputFields, JobField{
-				Field: field,
-				Value: row[i],
-			})
-
-		}
-
-		// Assign the OutputFields
-		for _, f := range p.Fields.OutputFields() {
-			newJob.OutputFields = append(newJob.OutputFields, JobField{
-				Field: f,
-			})
-		}
-
-		p.Jobs = append(p.Jobs, newJob)
+	t.RawData = string(body)
+	t.Parse()
+	if !t.VerifyWithWorkflow(w) {
+		return Task{}
 	}
+	t.WorkflowId = w.Id
 
-	task.PublishToMTurk()
+	Db.Create(&t)
+	t.PublishToMTurk()
+
+	return
 }
 
 func (w Workflow) PollTasks() {
@@ -65,29 +65,42 @@ func (w Workflow) PollTasks() {
 	// For each input field create an assignment
 }
 
-func (w Workflow) IsFinished() {
-	var assignments []Assignment
-	Db.Model(Assignment{}).Where("work_id = ?", w.Id).Find(&assignments)
-	// See if all the assignments are done
-}
+// func (w Workflow) IsFinished() {
+// 	var assignments []Assignment
+// 	Db.Model(Assignment{}).Where("work_id = ?", w.Id).Find(&assignments)
+// 	// See if all the assignments are done
+// }
 
-func (w Workflow) Parse() {
-	log.Println("Parsing Program")
-	dec := json.NewDecoder(strings.NewReader(w.ProgramJson))
-
-	err := dec.Decode(&w.Program)
+func (w *Workflow) Parse() {
+	err := json.Unmarshal([]byte(w.RawData), w)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 
-func NewWorkflow(workflow string) (w *Workflow) {
-	log.Println("Creating a new workflow")
+func (w *Workflow) IsValid() bool {
+	// Make sure inputs aren't more than 10 fields
 
-	w.rawData = workflow
+	return true
+}
+
+func NewWorkflow(workflow io.ReadCloser) (w Workflow) {
+	body, err := ioutil.ReadAll(workflow)
+	if err != nil {
+		log.Println(err)
+	}
+
+	w.RawData = string(body)
 	w.Parse()
+	if !w.IsValid() {
+		return Workflow{}
+	}
 
-	Db.Create(&workflow)
+	log.Println("Creating a new workflow", w.Title)
+	log.Println(string(body))
+	log.Println()
+
+	Db.Create(&w)
 
 	log.Println("Done creating workflow")
 
