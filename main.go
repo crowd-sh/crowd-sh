@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/coreos/go-etcd/etcd"
-	"github.com/crowdmob/goamz/aws"
-	"github.com/crowdmob/goamz/exp/mturk"
+	//	"github.com/crowdmob/goamz/aws"
+	//	"github.com/crowdmob/goamz/exp/mturk"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
@@ -18,8 +18,9 @@ const (
 )
 
 var (
-	Db    gorm.DB
-	MTurk mturk.MTurk
+	Db gorm.DB
+
+//	MTurk mturk.MTurk
 )
 
 func dbConnect(databaseUrl string) {
@@ -33,8 +34,8 @@ func dbConnect(databaseUrl string) {
 }
 
 func mturkConnect() {
-	auth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
-	MTurk = mturk.New(auth, true)
+	//	auth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
+	//	MTurk = mturk.New(auth, true)
 }
 
 func init() {

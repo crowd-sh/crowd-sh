@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/crowdmob/goamz/exp/mturk"
+	//	"github.com/crowdmob/goamz/exp/mturk"
 	"log"
 	"time"
 )
