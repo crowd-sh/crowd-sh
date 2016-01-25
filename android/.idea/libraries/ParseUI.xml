@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="ParseUI">
+    <CLASSES />
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../ParseUI-Android/facebook-sdk/facebook/src" />
+      <root url="file://$PROJECT_DIR$/../ParseUI-Android/facebook-sdk/facebook/tests/src" />
+      <root url="file://$PROJECT_DIR$/../ParseUI-Android/facebook-sdk/facebook/TestApp/src" />
+      <root url="file://$PROJECT_DIR$/../ParseUI-Android/ParseLoginUI/src" />
+      <root url="file://$PROJECT_DIR$/../ParseUI-Android/ParseLoginSampleBasic/src" />
+      <root url="file://$PROJECT_DIR$/../ParseUI-Android/ParseLoginSampleLayoutOverride/src" />
+      <root url="file://$PROJECT_DIR$/../ParseUI-Android/ParseLoginSampleCodeCustomization/src" />
+      <root url="file://$PROJECT_DIR$/../ParseUI-Android/ParseLoginSampleWithDispatchActivity/src" />
+    </SOURCES>
+  </library>
+</component>

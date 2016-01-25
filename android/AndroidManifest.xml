@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="us.workmachine"
+          android:versionCode="3"
+          android:versionName="1.1.1">
+    <uses-sdk android:minSdkVersion="15"/>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="com.android.vending.BILLING"/>
+
+    <application android:label="@string/app_name"
+                 android:icon="@drawable/ic_launcher"
+                 android:theme="@android:style/Theme.Holo.Light">
+        <activity
+                android:name="com.parse.ui.ParseLoginActivity"
+                android:label="@string/app_name"
+                android:launchMode="singleTop">
+            <meta-data
+                    android:name="com.parse.ui.ParseLoginActivity.PARSE_LOGIN_ENABLED"
+                    android:value="true"/>
+
+            <!-- Added these options below to customize the login flow -->
+            <meta-data
+                    android:name="com.parse.ui.ParseLoginActivity.APP_LOGO"
+                    android:resource="@drawable/app_logo"/>
+            <meta-data
+                    android:name="com.parse.ui.ParseLoginActivity.FACEBOOK_LOGIN_ENABLED"
+                    android:value="true"/>
+            <meta-data
+                    android:name="com.parse.ui.ParseLoginActivity.TWITTER_LOGIN_ENABLED"
+                    android:value="true"/>
+            <meta-data
+                    android:name="com.parse.ui.ParseLoginActivity.PARSE_LOGIN_HELP_TEXT"
+                    android:value="@string/reset_password"/>
+            <meta-data
+                    android:name="com.parse.ui.ParseLoginActivity.PARSE_LOGIN_EMAIL_AS_USERNAME"
+                    android:value="true"/>
+        </activity>
+        <activity android:name="WorkMachine"
+                  android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
