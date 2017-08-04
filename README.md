@@ -11,23 +11,37 @@ to define arbitrary workflows which require human workers.
 
 ## Usage
 
-### Create Workflow
+### New Project
 
-curl -X POST -H "Content-Type: application/json" -d @british_library_tag.json localhost:3002/v1/workflows
+Create a new project with
+```
+workmachine init
+```
 
-### Create New Task
+This will generate a new `workmachine.json` file in the directory.
 
-curl -X POST -H "Content-Type: application/json" -d @sample.json localhost:3002/v1/workflows/5/tasks
+```
+```
 
-## Documentation
+### Upload
 
-Check out the wiki for more information.
+Upload the work to Mechanical Turk.
 
-     https://github.com/workmachine/workmachine/wiki
+```
+workmachine upload
+```
+
+### Gather
+
+Get the information back from Mechanical Turk.
+
+```
+workmachine gather
+```
 
 ## The MIT License (MIT)
 
-Copyright (c) 2012-2015 Abhi Yerra <abhi@berkeley.edu>
+Copyright (c) 2012-2017 Abhi Yerra <abhi@berkeley.edu>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
