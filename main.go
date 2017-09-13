@@ -1,123 +1,128 @@
+// Copyright © 2017 Abhi Yerra <abhi@opszero.com>
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/coreos/go-etcd/etcd"
-	//	"github.com/crowdmob/goamz/aws"
-	//	"github.com/crowdmob/goamz/exp/mturk"
-	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
-	_ "github.com/lib/pq"
-	"log"
-	"net/http"
+	"io/ioutil"
 	"os"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/mturk"
 )
+
+type TaskStatus string
 
 const (
-	DatabaseUrlKey = "/workmachine/database_url"
+	FinishedStatus TaskStatus = "finished"
 )
 
-var (
-	Db gorm.DB
+type Field struct {
+	Name        string
+	Type        string
+	Description string
+	Value       string
+}
 
-//	MTurk mturk.MTurk
+type Task struct {
+	HitID    string
+	SourceID string
+	Fields   []Field
+	Status   TaskStatus
+}
+
+type Workflow struct {
+	Title       string
+	Description string
+	Tags        string
+	Reward      string
+
+	InputFile  string
+	OutputFile string
+
+	Fields []Field
+
+	Tasks []Task
+	MTurk struct {
+		HitTypeId string
+	}
+
+	client *mturk.MTurk
+}
+
+const (
+	SandboxEndpoint = "https://mturk-requester-sandbox.us-east-1.amazonaws.com"
 )
 
-func dbConnect(databaseUrl string) {
-	log.Println("Connecting to database:", databaseUrl)
-	var err error
-	Db, err = gorm.Open("postgres", databaseUrl)
-	if err != nil {
-		log.Println(err)
+func (w *Workflow) Config() {
+	file, e := ioutil.ReadFile(os.Args[1])
+	if e != nil {
+		fmt.Printf("File error: %v\n", e)
+		os.Exit(1)
 	}
-	Db.LogMode(true)
+	fmt.Printf("%s\n", string(file))
+
+	json.Unmarshal(file, w)
+
+	sess := session.Must(session.NewSession())
+	w.client = mturk.New(sess, &aws.Config{
+		Credentials: credentials.NewSharedCredentials("/home/abhi/.aws/credentials", "opszero_mturk"),
+		Endpoint:    aws.String(SandboxEndpoint),
+		Region:      aws.String("us-east-1"),
+	})
+
+	x, err := w.client.GetAccountBalance(nil)
+	fmt.Println(err)
+	fmt.Println(x)
 }
 
-func mturkConnect() {
-	//	auth := aws.Auth{AccessKey: "abc", SecretKey: "123"}
-	//	MTurk = mturk.New(auth, true)
-}
-
-func init() {
-	etcdHosts := os.Getenv("ETCD_HOSTS")
-	if etcdHosts == "" {
-		etcdHosts = "http://127.0.0.1:4001"
-	}
-
-	etcdClient := etcd.NewClient([]string{etcdHosts})
-
-	resp, err := etcdClient.Get(DatabaseUrlKey, false, false)
+func (w *Workflow) Save() {
+	b, err := json.MarshalIndent(w, "", "    ")
 	if err != nil {
 		panic(err)
 	}
 
-	databaseUrl := resp.Node.Value
-	dbConnect(databaseUrl)
+	ioutil.WriteFile(os.Args[1], b, os.ModePerm)
+}
+
+func (w *Workflow) BuildHit() {
+	a := aws.String(w.Reward)
+	fmt.Println(*a)
+
+	resp, err := w.client.CreateHITType(&mturk.CreateHITTypeInput{
+		AssignmentDurationInSeconds: aws.Int64(300),
+		AutoApprovalDelayInSeconds:  aws.Int64(3000),
+		Title:       aws.String(w.Title),
+		Description: aws.String(w.Description),
+		Keywords:    aws.String(w.Tags),
+		Reward:      aws.String(w.Reward),
+	})
+
+	fmt.Println(err)
+	fmt.Println(resp)
+
+	w.MTurk.HitTypeId = *resp.HITTypeId
 }
 
 func main() {
-	//	go AssignmentExpirer()
+	w := &Workflow{}
+	w.Config()
+	w.BuildHit()
+	w.Save()
 
-	log.Println("WorkMachine Starting...")
-
-	r := mux.NewRouter()
-	r.HandleFunc("/v1/workflows", func(w http.ResponseWriter, r *http.Request) {
-		workflow := NewWorkflow(r.Body)
-		fmt.Fprintln(w, workflow.Id)
-	}).Methods("POST")
-
-	r.HandleFunc("/v1/workflows/{workflow}", func(w http.ResponseWriter, r *http.Request) {
-
-	}).Methods("GET")
-
-	r.HandleFunc("/v1/workflows/{workflow}/tasks", func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-
-		workflow := Workflow{}
-		Db.First(&workflow, vars["workflow"])
-		workflow.Parse()
-
-		t := workflow.AddTask(r.Body)
-
-		fmt.Fprintln(w, t.Id)
-	}).Methods("POST")
-
-	r.HandleFunc("/v1/workflows/{workflow}/tasks/{tasks}", func(w http.ResponseWriter, r *http.Request) {
-
-	}).Methods("GET")
-
-	//r.HandleFunc("/v1/workflow/{workflow}/tests", TaskHandler).Methods("PUT")
-
-	// r.HandleFunc("/v1/assignments", func(w http.ResponseWriter, req *http.Request) {
-	// 	assign := AvailableAssignments.GetUnfinished()
-	// 	if assign == nil {
-	// 		renderJson(w, false)
-	// 		return
-	// 	}
-
-	// 	if !assign.TryToAssign() {
-	// 		renderJson(w, false)
-	// 		return
-	// 	}
-
-	// 	renderJson(w, assign)
-	// }).Methods("GET")
-
-	// r.HandleFunc("/v1/assignments", func(w http.ResponseWriter, req *http.Request) {
-	// 	log.Println("Posting", req.FormValue("id"))
-
-	// 	assign := AvailableAssignments.Find(req.FormValue("id"))
-	// 	if assign != nil {
-	// 		assign.Finish(req.FormValue(assign.InputField.Value))
-	// 	}
-
-	// 	renderJson(w, true)
-	// }).Methods("POST")
-
-	r.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println(r.URL.Path[1:])
-		http.ServeFile(w, r, r.URL.Path[1:])
-	})
-	http.Handle("/", r)
-	http.ListenAndServe(":3002", nil)
 }

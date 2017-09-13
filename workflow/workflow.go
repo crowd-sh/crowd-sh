@@ -1,44 +1,18 @@
-package main
+package workflow
 
 import (
-	"encoding/json"
 	"io"
 	"io/ioutil"
 	"log"
 )
 
 const (
-	LongTextType = "long_text"
-	ImageType    = "image"
-	HiddenType   = "hidden"
-	CheckBoxType = "checkbox"
+	CSVSource = "CSV"
 )
 
-type InputField struct {
-	Id          string `json:"id"`
-	Type        string `json:"field_type"`
-	Value       string `json:"value"`
-	Description string `json:"description"`
-}
-
-type OutputField struct {
-	Id          string `json:"id"`
-	Type        string `json:"field_type"`
-	Value       string `json:"value"`
-	Description string `json:"description"`
-	Validation  string `json:"validation"`
-}
-
-type Workflow struct {
-	Id           int64         `json:"id"`
-	Title        string        `json:"title"`
-	Description  string        `json:"description"`
-	Tags         string        `json:"tags"`
-	Url          string        `json:"url"`
-	Price        int           `json:"price"`
-	InputFields  []InputField  `json:"input_fields"`
-	OutputFields []OutputField `json:"output_fields"`
-	RawData      string        `json:"-"`
+type Source struct {
+	Type     string
+	Filename string
 }
 
 func (w *Workflow) AddTask(task io.ReadCloser) (t Task) {
@@ -60,7 +34,12 @@ func (w *Workflow) AddTask(task io.ReadCloser) (t Task) {
 	return
 }
 
-func (w Workflow) PollTasks() {
+func (w *Workflow) Upload() {
+	// Find all input fields.
+	// For each input field create an assignment
+}
+
+func (w *Workflow) Gather() {
 	// Find all input fields.
 	// For each input field create an assignment
 }
@@ -76,12 +55,6 @@ func (w *Workflow) Parse() {
 	if err != nil {
 		log.Println(err)
 	}
-}
-
-func (w *Workflow) IsValid() bool {
-	// Make sure inputs aren't more than 10 fields
-
-	return true
 }
 
 func NewWorkflow(workflow io.ReadCloser) (w Workflow) {

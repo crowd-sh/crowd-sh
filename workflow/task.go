@@ -2,30 +2,46 @@ package main
 
 import (
 	"encoding/json"
-	//	"github.com/crowdmob/goamz/exp/mturk"
 	"log"
 	"time"
 )
+
+const (
+	LongTextType = "LongText"
+	ImageType    = "Image"
+	HiddenType   = "Hidden"
+	CheckBoxType = "Checkbox"
+)
+
+type TaskField struct {
+	ID          string
+	Type        string
+	Value       string
+	Description string
+}
 
 const (
 	Working  = "Working"
 	Finished = "Finished"
 )
 
-type Task struct {
-	Id           int64       `json:"id"`
-	WorkflowId   int64       `json:"-"`
-	Status       string      `json:"status"`
-	InputFields  []TaskField `json:"input_fields"`
-	OutputFields []TaskField `json:"output_fields"`
-	Token        string      `json:"-"` // MTurkId
-	RawData      string      `json:"-"`
-	CreatedAt    time.Time   `json:"-"`
+type Batch struct {
+	ID string
+
+	Title       string
+	Description string
+	Tags        string
+	Bid         int
+
+	Inputs  []TaskField
+	Outputs []TaskField
+	Status  string
+
+	CreatedAt time.Time
 }
 
-type TaskField struct {
-	Key   string
-	Value string
+type Task struct {
+	Fields map[string]string
 }
 
 func (t *Task) Parse() {
