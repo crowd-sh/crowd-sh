@@ -16,6 +16,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
@@ -24,7 +25,6 @@ import (
 
 	"github.com/recursionpharma/go-csv-map"
 
-	"encoding/csv"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -46,9 +46,13 @@ type Field struct {
 
 func (t *Field) HTML() string {
 	return fmt.Sprintf(`
+<div class="row">
+<div class="col-md-12">
   <h2>%s</h2>
   <p>%s</p>
-  <p><textarea name='%s' cols='80' rows='3'>%s</textarea></p>`, t.Name, t.Description, t.Name, t.Value)
+  <p><textarea name='%s' cols='80' rows='3'>%s</textarea></p>
+</div>
+</div>`, t.Name, t.Description, t.Name, t.Value)
 }
 
 type Task struct {
@@ -87,29 +91,35 @@ func (t *Task) Question() string {
  <head>
   <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
   <script type='text/javascript' src='https://s3.amazonaws.com/mturk-public/externalHIT_v1.js'></script>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
  </head>
  <body>
-  <form name='mturk_form' method='post' id='mturk_form' action='https://www.mturk.com/mturk/externalSubmit'>
-<h1>%s</h1>
+  <div class="container">
+    <form name='mturk_form' method='post' id='mturk_form' action='https://www.mturk.com/mturk/externalSubmit'>
+    <h1>%s</h1>
 
-<p>
-%s
-</p>
+    <p>
+    %s
+    </p>
 
-%s
+    %s
 
-  <p>
-    <input type='hidden' value='' name='assignmentId' id='assignmentId'/>
-    <input type='submit' id='submitButton' value='Submit' /> 
-  </p>
-  </form>
+    <p>
+	<input type='hidden' value='' name='assignmentId' id='assignmentId'/>
+	<input type='submit' id='submitButton' value='Submit' class='btn btn-success' /> 
+    </p>
+    </form>
+  </div>
 
   <script language='Javascript'>turkSetAssignmentID();</script>
  </body>
 </html>
 ]]>
   </HTMLContent>
-  <FrameHeight>450</FrameHeight>
+  <FrameHeight>1000</FrameHeight>
 </HTMLQuestion>
 `, t.Title, t.Description, fieldsHTML)
 }
