@@ -196,7 +196,7 @@ func (w *Workflow) BuildHit() {
 	}
 
 	resp, err := w.client.CreateHITType(&mturk.CreateHITTypeInput{
-		AssignmentDurationInSeconds: aws.Int64(300),
+		AssignmentDurationInSeconds: aws.Int64(3000),
 		AutoApprovalDelayInSeconds:  aws.Int64(3000),
 		Title:       aws.String(w.Title),
 		Description: aws.String(w.Description),
@@ -254,7 +254,7 @@ func (w *Workflow) BuildTasks() {
 				HITTypeId:         aws.String(w.MTurk.HitTypeId),
 				MaxAssignments:    aws.Int64(1),
 				Question:          aws.String(t.Question()),
-				LifetimeInSeconds: aws.Int64(86400),
+				LifetimeInSeconds: aws.Int64(86400 * 5),
 			})
 
 			fmt.Println(err)
@@ -306,15 +306,17 @@ func (w *Workflow) SaveOutput() {
 	defer writer.Flush()
 
 	var header []string
+	header = []string{"ID"}
+
 	for i := range w.Fields {
 		header = append(header, w.Fields[i].Name)
 	}
 	writer.Write(header)
 
-	for i := range w.Tasks {
-		var fields []string
+	for _, task := range w.Tasks {
+		fields := []string{task.SourceID}
 
-		for _, field := range w.Tasks[i].Fields {
+		for _, field := range task.Fields {
 			fields = append(fields, field.Value)
 		}
 
