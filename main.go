@@ -145,6 +145,7 @@ type Workflow struct {
 
 const (
 	SandboxEndpoint = "https://mturk-requester-sandbox.us-east-1.amazonaws.com"
+	LiveEndpoint    = "https://mturk-requester.us-east-1.amazonaws.com"
 )
 
 func (w *Workflow) Config() {
@@ -157,10 +158,17 @@ func (w *Workflow) Config() {
 
 	json.Unmarshal(file, w)
 
+	endpoint := SandboxEndpoint
+	if len(os.Args) > 2 && os.Args[2] == "live" {
+		endpoint = LiveEndpoint
+	}
+
+	fmt.Println(endpoint)
+
 	sess := session.Must(session.NewSession())
 	w.client = mturk.New(sess, &aws.Config{
 		Credentials: credentials.NewSharedCredentials("/home/abhi/.aws/credentials", "opszero_mturk"),
-		Endpoint:    aws.String(SandboxEndpoint),
+		Endpoint:    aws.String(endpoint),
 		Region:      aws.String("us-east-1"),
 	})
 
