@@ -149,21 +149,24 @@ const (
 )
 
 func (w *Workflow) Config() {
-	file, e := ioutil.ReadFile(os.Args[1])
-	if e != nil {
-		fmt.Printf("File error: %v\n", e)
+	file, err := ioutil.ReadFile(os.Args[1])
+	if err != nil {
+		fmt.Printf("File error: %v\n", err)
 		os.Exit(1)
 	}
-	fmt.Printf("%s\n", string(file))
 
-	json.Unmarshal(file, w)
+	err = json.Unmarshal(file, w)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(-1)
+	}
 
 	endpoint := SandboxEndpoint
 	if len(os.Args) > 2 && os.Args[2] == "live" {
 		endpoint = LiveEndpoint
 	}
 
-	fmt.Println(endpoint)
+	fmt.Println("Endpoint:", endpoint)
 
 	sess := session.Must(session.NewSession())
 	w.client = mturk.New(sess, &aws.Config{
@@ -172,9 +175,11 @@ func (w *Workflow) Config() {
 		Region:      aws.String("us-east-1"),
 	})
 
-	x, err := w.client.GetAccountBalance(nil)
-	fmt.Println(err)
-	fmt.Println(x)
+	resp, err := w.client.GetAccountBalance(nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(resp)
 }
 
 func (w *Workflow) Save() {
@@ -187,11 +192,8 @@ func (w *Workflow) Save() {
 }
 
 func (w *Workflow) BuildHit() {
-	a := aws.String(w.Reward)
-	fmt.Println(*a)
-
 	if w.MTurk.HitTypeId != "" {
-		// Update Lead here
+		// Update HIT here
 		return
 	}
 
@@ -204,25 +206,25 @@ func (w *Workflow) BuildHit() {
 		Reward:      aws.String(w.Reward),
 	})
 
-	fmt.Println(err)
-	fmt.Println(resp)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	w.MTurk.HitTypeId = *resp.HITTypeId
 }
 
 func (w *Workflow) BuildTasks() {
-	file, e := ioutil.ReadFile(w.InputFile)
-	fmt.Println(e)
-	fmt.Println(file)
-
-	var err error
+	file, err := ioutil.ReadFile(w.InputFile)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	reader := csvmap.NewReader(bytes.NewReader(file))
 	reader.Columns, err = reader.ReadHeader()
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(reader.Columns)
 
 	records, err := reader.ReadAll()
 	if err != nil {
