@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"html"
 	"io/ioutil"
 	"os"
 
@@ -50,9 +51,13 @@ func (t *Field) HTML() string {
 <div class="col-md-12">
   <h2>%s</h2>
   <p>%s</p>
-  <p><textarea name='%s' cols='80' rows='3'>%s</textarea></p>
+  <p>
+    <textarea name='%s' cols='80' rows='3'>
+    %s
+    </textarea>
+  </p>
 </div>
-</div>`, t.Name, t.Description, t.Name, t.Value)
+</div>`, html.EscapeString(t.Name), html.EscapeString(t.Description), t.Name, t.Value)
 }
 
 type Task struct {
@@ -121,7 +126,7 @@ func (t *Task) Question() string {
   </HTMLContent>
   <FrameHeight>1000</FrameHeight>
 </HTMLQuestion>
-`, t.Title, t.Description, fieldsHTML)
+`, html.EscapeString(t.Title), html.EscapeString(t.Description), fieldsHTML)
 }
 
 type Workflow struct {
@@ -260,11 +265,16 @@ func (w *Workflow) BuildTasks() {
 			})
 
 			fmt.Println(err)
-
-			t.HitID = *resp.HIT.HITId
-
-			w.Tasks = append(w.Tasks, *t)
+			if err == nil {
+				t.HitID = *resp.HIT.HITId
+				w.Tasks = append(w.Tasks, *t)
+			} else {
+				if r := recover(); r != nil {
+					fmt.Println("Recovered", r)
+				}
+			}
 		} else {
+			// UpdateHITTypeOfHIT
 			for field := range t.Fields {
 				f := &t.Fields[field]
 				f.Value = records[i][f.Name]
