@@ -11,33 +11,17 @@ to define arbitrary workflows which require human workers.
 
 ## Usage
 
-### New Project
-
-Create a new project with
+### Staging
 ```
-workmachine init
+workmachine config.json
 ```
 
-This will generate a new `workmachine.json` file in the directory.
+### Production
 
 ```
+workmachine config.json live
 ```
 
-### Upload
-
-Upload the work to Mechanical Turk.
-
-```
-workmachine upload
-```
-
-### Gather
-
-Get the information back from Mechanical Turk.
-
-```
-workmachine gather
-```
 
 ## The MIT License (MIT)
 
