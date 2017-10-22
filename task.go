@@ -29,7 +29,6 @@ type Task struct {
 	HitID    string
 	SourceID string
 	Fields   []Field
-	Status   TaskStatus
 
 	MTurk struct {
 		QuestionFormAnswers struct {

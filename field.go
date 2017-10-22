@@ -15,24 +15,28 @@
 package main
 
 import (
-	"flag"
+	"fmt"
+	"html"
 )
 
-const (
-	SandboxEndpoint = "https://mturk-requester-sandbox.us-east-1.amazonaws.com"
-	LiveEndpoint    = "https://mturk-requester.us-east-1.amazonaws.com"
-)
-
-func init() {
-
-	flag.Parse()
+type Field struct {
+	Name        string
+	Type        string
+	Description string
+	Value       string
 }
 
-func main() {
-	w := &Workflow{}
-	w.Config()
-	w.BuildHit()
-	w.Save()
-	w.BuildTasks()
-	w.SaveOutput()
+func (t *Field) HTML() string {
+	return fmt.Sprintf(`
+<div class="row">
+<div class="col-md-12">
+  <h2>%s</h2>
+  <p>%s</p>
+  <p>
+    <textarea name='%s' cols='80' rows='3'>
+    %s
+    </textarea>
+  </p>
+</div>
+</div>`, html.EscapeString(t.Name), html.EscapeString(t.Description), t.Name, t.Value)
 }
