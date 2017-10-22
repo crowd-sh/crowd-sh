@@ -14,19 +14,10 @@
 
 package main
 
-import (
-	"flag"
-)
-
 const (
 	SandboxEndpoint = "https://mturk-requester-sandbox.us-east-1.amazonaws.com"
 	LiveEndpoint    = "https://mturk-requester.us-east-1.amazonaws.com"
 )
-
-func init() {
-
-	flag.Parse()
-}
 
 func main() {
 	w := &Workflow{}
