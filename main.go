@@ -264,11 +264,11 @@ func (w *Workflow) BuildTasks() {
 				LifetimeInSeconds: aws.Int64(86400 * 5),
 			})
 
-			fmt.Println(err)
 			if err == nil {
 				t.HitID = *resp.HIT.HITId
 				w.Tasks = append(w.Tasks, *t)
 			} else {
+				fmt.Println(err)
 				if r := recover(); r != nil {
 					fmt.Println("Recovered", r)
 				}

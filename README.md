@@ -1,7 +1,5 @@
 # WorkMachine
 
-[![Build Status](https://travis-ci.org/workmachine/workmachine.png?branch=master)](https://travis-ci.org/abhiyerra/workmachine)
-
 WorkMachine allows you to run crowdsourced workflows involving human
 intervention. For example, take image transcription can be processed
 using an OCR engine but that doesn't assure use that the quality will
@@ -11,52 +9,6 @@ to define arbitrary workflows which require human workers.
 
 ## Usage
 
-### New Project
-
-Create a new project with
 ```
-workmachine init
+workmachine config.json
 ```
-
-This will generate a new `workmachine.json` file in the directory.
-
-```
-```
-
-### Upload
-
-Upload the work to Mechanical Turk.
-
-```
-workmachine upload
-```
-
-### Gather
-
-Get the information back from Mechanical Turk.
-
-```
-workmachine gather
-```
-
-## The MIT License (MIT)
-
-Copyright (c) 2012-2017 Abhi Yerra <abhi@berkeley.edu>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
