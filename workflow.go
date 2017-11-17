@@ -73,7 +73,7 @@ func (w *Workflow) Config() {
 
 	sess := session.Must(session.NewSession())
 	w.client = mturk.New(sess, &aws.Config{
-		Credentials: credentials.NewSharedCredentials("/home/abhi/.aws/credentials", "opszero_mturk"),
+		Credentials: credentials.NewSharedCredentials("/Users/abhi/.aws/credentials", "opszero_mturk"),
 		Endpoint:    aws.String(endpoint),
 		Region:      aws.String("us-east-1"),
 	})
@@ -116,6 +116,32 @@ func (w *Workflow) BuildHit() {
 	w.MTurk.HitTypeId = *resp.HITTypeId
 }
 
+func (w *Workflow) newTask(records []map[string]string, i int, t *Task) {
+	for _, workflowField := range w.Fields {
+		workflowField.Value = records[i][workflowField.Name]
+		fmt.Println(records[i])
+		fmt.Println(records[i][workflowField.Name])
+		t.Fields = append(t.Fields, workflowField)
+	}
+
+	resp, err := w.client.CreateHITWithHITType(&mturk.CreateHITWithHITTypeInput{
+		HITTypeId:         aws.String(w.MTurk.HitTypeId),
+		MaxAssignments:    aws.Int64(1),
+		Question:          aws.String(t.Question()),
+		LifetimeInSeconds: aws.Int64(86400 * 5),
+	})
+
+	if err == nil {
+		t.HitID = *resp.HIT.HITId
+		w.Tasks = append(w.Tasks, *t)
+	} else {
+		fmt.Println(err)
+		if r := recover(); r != nil {
+			fmt.Println("Recovered", r)
+		}
+	}
+}
+
 func (w *Workflow) BuildTasks() {
 	file, err := ioutil.ReadFile(w.InputFile)
 	if err != nil {
@@ -148,29 +174,7 @@ func (w *Workflow) BuildTasks() {
 		}
 
 		if newTask {
-			for _, workflowField := range w.Fields {
-				workflowField.Value = records[i][workflowField.Name]
-				fmt.Println(records[i])
-				fmt.Println(records[i][workflowField.Name])
-				t.Fields = append(t.Fields, workflowField)
-			}
-
-			resp, err := w.client.CreateHITWithHITType(&mturk.CreateHITWithHITTypeInput{
-				HITTypeId:         aws.String(w.MTurk.HitTypeId),
-				MaxAssignments:    aws.Int64(1),
-				Question:          aws.String(t.Question()),
-				LifetimeInSeconds: aws.Int64(86400 * 5),
-			})
-
-			if err == nil {
-				t.HitID = *resp.HIT.HITId
-				w.Tasks = append(w.Tasks, *t)
-			} else {
-				fmt.Println(err)
-				if r := recover(); r != nil {
-					fmt.Println("Recovered", r)
-				}
-			}
+			w.newTask(records, i, t)
 		} else {
 			// UpdateHITTypeOfHIT
 			for field := range t.Fields {
