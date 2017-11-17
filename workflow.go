@@ -116,12 +116,14 @@ func (w *Workflow) BuildHit() {
 	w.MTurk.HitTypeId = *resp.HITTypeId
 }
 
-func (w *Workflow) newTask(records []map[string]string, i int, t *Task) {
-	for _, workflowField := range w.Fields {
-		workflowField.Value = records[i][workflowField.Name]
-		fmt.Println(records[i])
-		fmt.Println(records[i][workflowField.Name])
-		t.Fields = append(t.Fields, workflowField)
+func (w *Workflow) newTask(records []map[string]string, i int, t *Task, isRepeat bool) {
+	if !isRepeat {
+		for _, workflowField := range w.Fields {
+			workflowField.Value = records[i][workflowField.Name]
+			fmt.Println(records[i])
+			fmt.Println(records[i][workflowField.Name])
+			t.Fields = append(t.Fields, workflowField)
+		}
 	}
 
 	resp, err := w.client.CreateHITWithHITType(&mturk.CreateHITWithHITTypeInput{
@@ -174,7 +176,7 @@ func (w *Workflow) BuildTasks() {
 		}
 
 		if newTask {
-			w.newTask(records, i, t)
+			w.newTask(records, i, t, false)
 		} else {
 			// UpdateHITTypeOfHIT
 			for field := range t.Fields {
@@ -189,21 +191,27 @@ func (w *Workflow) BuildTasks() {
 			fmt.Println(err)
 			fmt.Println(resp)
 
-			t.MTurk.Assignments = resp.Assignments
-
 			if len(resp.Assignments) > 0 {
-				xml.Unmarshal([]byte(*resp.Assignments[0].Answer), &t.MTurk.QuestionFormAnswers)
+				if *resp.Assignments[0].AssignmentStatus == "Rejected" {
+					w.newTask(records, i, t, true)
+				}
+			} else {
+				t.MTurk.Assignments = resp.Assignments
 
-				for field := range t.Fields {
-					f := &t.Fields[field]
+				if len(resp.Assignments) > 0 {
+					xml.Unmarshal([]byte(*resp.Assignments[0].Answer), &t.MTurk.QuestionFormAnswers)
 
-					for _, answer := range t.MTurk.QuestionFormAnswers.Answer {
-						if f.Name == answer.QuestionIdentifier {
-							f.Value = strings.TrimSpace(answer.FreeText)
+					for field := range t.Fields {
+						f := &t.Fields[field]
+
+						for _, answer := range t.MTurk.QuestionFormAnswers.Answer {
+							if f.Name == answer.QuestionIdentifier {
+								f.Value = strings.TrimSpace(answer.FreeText)
+							}
 						}
 					}
-				}
 
+				}
 			}
 		}
 
