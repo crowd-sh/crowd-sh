@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -194,7 +195,7 @@ func (w *Workflow) BuildTasks() {
 
 					for _, answer := range t.MTurk.QuestionFormAnswers.Answer {
 						if f.Name == answer.QuestionIdentifier {
-							f.Value = answer.FreeText
+							f.Value = strings.TrimSpace(answer.FreeText)
 						}
 					}
 				}

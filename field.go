@@ -33,9 +33,7 @@ func (t *Field) HTML() string {
   <h2>%s</h2>
   <p>%s</p>
   <p>
-    <textarea name='%s' cols='80' rows='3'>
-    %s
-    </textarea>
+    <textarea name='%s' cols='80' rows='3'>%s</textarea>
   </p>
 </div>
 </div>`, html.EscapeString(t.Name), html.EscapeString(t.Description), t.Name, t.Value)
