@@ -145,6 +145,50 @@ func (w *Workflow) newTask(records []map[string]string, i int, t *Task, isRepeat
 	}
 }
 
+func (w *Workflow) updateTask(records []map[string]string, i int, t *Task) {
+	// UpdateHITTypeOfHIT
+	for field := range t.Fields {
+		f := &t.Fields[field]
+		f.Value = records[i][f.Name]
+	}
+
+	resp, err := w.client.ListAssignmentsForHIT(&mturk.ListAssignmentsForHITInput{
+		HITId: aws.String(t.HitID),
+	})
+
+	fmt.Println(err)
+	fmt.Println(resp)
+
+	allRejected := true
+
+	for _, ass := range resp.Assignments {
+		if *ass.AssignmentStatus != "Rejected" && allRejected {
+			allRejected = false
+		}
+	}
+
+	if allRejected {
+		w.newTask(records, i, t, true)
+	} else {
+		t.MTurk.Assignments = resp.Assignments
+
+		if len(resp.Assignments) > 0 {
+			xml.Unmarshal([]byte(*resp.Assignments[0].Answer), &t.MTurk.QuestionFormAnswers)
+
+			for field := range t.Fields {
+				f := &t.Fields[field]
+
+				for _, answer := range t.MTurk.QuestionFormAnswers.Answer {
+					if f.Name == answer.QuestionIdentifier {
+						f.Value = strings.TrimSpace(answer.FreeText)
+					}
+				}
+			}
+
+		}
+	}
+}
+
 func (w *Workflow) BuildTasks() {
 	file, err := ioutil.ReadFile(w.InputFile)
 	if err != nil {
@@ -179,47 +223,7 @@ func (w *Workflow) BuildTasks() {
 		if newTask {
 			w.newTask(records, i, t, false)
 		} else {
-			// UpdateHITTypeOfHIT
-			for field := range t.Fields {
-				f := &t.Fields[field]
-				f.Value = records[i][f.Name]
-			}
-
-			resp, err := w.client.ListAssignmentsForHIT(&mturk.ListAssignmentsForHITInput{
-				HITId: aws.String(t.HitID),
-			})
-
-			fmt.Println(err)
-			fmt.Println(resp)
-
-			allRejected := true
-
-			for _, ass := range resp.Assignments {
-				if *ass.AssignmentStatus != "Rejected" && allRejected {
-					allRejected = false
-				}
-			}
-
-			if allRejected {
-				w.newTask(records, i, t, true)
-			} else {
-				t.MTurk.Assignments = resp.Assignments
-
-				if len(resp.Assignments) > 0 {
-					xml.Unmarshal([]byte(*resp.Assignments[0].Answer), &t.MTurk.QuestionFormAnswers)
-
-					for field := range t.Fields {
-						f := &t.Fields[field]
-
-						for _, answer := range t.MTurk.QuestionFormAnswers.Answer {
-							if f.Name == answer.QuestionIdentifier {
-								f.Value = strings.TrimSpace(answer.FreeText)
-							}
-						}
-					}
-
-				}
-			}
+			w.updateTask(records, i, t)
 		}
 
 		w.Save()
