@@ -103,7 +103,7 @@ func (w *Workflow) BuildHit() {
 
 	resp, err := w.client.CreateHITType(&mturk.CreateHITTypeInput{
 		AssignmentDurationInSeconds: aws.Int64(3000),
-		AutoApprovalDelayInSeconds:  aws.Int64(3000),
+		AutoApprovalDelayInSeconds:  aws.Int64(86400),
 		Title:       aws.String(w.Title),
 		Description: aws.String(w.Description),
 		Keywords:    aws.String(w.Tags),
