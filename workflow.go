@@ -66,7 +66,7 @@ func (w *Workflow) Config() {
 	}
 
 	endpoint := SandboxEndpoint
-	if len(os.Args) > 2 && os.Args[2] == "live" {
+	if isLive {
 		endpoint = LiveEndpoint
 	}
 
