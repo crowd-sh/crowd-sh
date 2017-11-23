@@ -19,7 +19,6 @@ workmachine config.json
 workmachine config.json live
 ```
 
-
 ## The MIT License (MIT)
 
 Copyright (c) 2012-2017 Abhi Yerra <abhi@berkeley.edu>
