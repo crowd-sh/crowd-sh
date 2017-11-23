@@ -14,6 +14,8 @@
 
 package main
 
+import "time"
+
 const (
 	SandboxEndpoint = "https://mturk-requester-sandbox.us-east-1.amazonaws.com"
 	LiveEndpoint    = "https://mturk-requester.us-east-1.amazonaws.com"
@@ -24,6 +26,8 @@ func main() {
 	w.Config()
 	w.BuildHit()
 	w.Save()
+	go w.SaveOutput()
 	w.BuildTasks()
-	w.SaveOutput()
+
+	time.Sleep(8 * time.Second)
 }

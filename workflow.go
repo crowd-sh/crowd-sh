@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -191,10 +192,16 @@ func (w *Workflow) BuildTasks() {
 			fmt.Println(err)
 			fmt.Println(resp)
 
-			if len(resp.Assignments) > 0 {
-				if *resp.Assignments[0].AssignmentStatus == "Rejected" {
-					w.newTask(records, i, t, true)
+			allRejected := true
+
+			for _, ass := range resp.Assignments {
+				if *ass.AssignmentStatus != "Rejected" && allRejected {
+					allRejected = false
 				}
+			}
+
+			if allRejected {
+				w.newTask(records, i, t, true)
 			} else {
 				t.MTurk.Assignments = resp.Assignments
 
@@ -243,5 +250,10 @@ func (w *Workflow) SaveOutput() {
 		}
 
 		writer.Write(fields)
+	}
+
+	select {
+	case <-time.After(5 * time.Second):
+		fmt.Println("Save")
 	}
 }
