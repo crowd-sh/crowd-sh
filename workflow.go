@@ -1,21 +1,6 @@
-// Copyright © 2017 Abhi Yerra <abhi@opszero.com>
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package main
 
 import (
-	"bytes"
 	"encoding/csv"
 	"encoding/json"
 	"encoding/xml"
@@ -29,8 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/mturk"
-
-	csvmap "github.com/recursionpharma/go-csv-map"
+	"github.com/opszero/workmachine/sources"
 )
 
 type Workflow struct {
@@ -39,7 +23,10 @@ type Workflow struct {
 	Tags        string
 	Reward      string
 
-	InputFile  string
+	Input struct {
+		Source sources.Source
+		Type   sources.SourceType
+	}
 	OutputFile string
 
 	Fields []Field
@@ -190,22 +177,7 @@ func (w *Workflow) updateTask(records []map[string]string, i int, t *Task) {
 }
 
 func (w *Workflow) BuildTasks() {
-	file, err := ioutil.ReadFile(w.InputFile)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	reader := csvmap.NewReader(bytes.NewReader(file))
-	reader.Columns, err = reader.ReadHeader()
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	records, err := reader.ReadAll()
-	if err != nil {
-		fmt.Println(err)
-	}
+	records := w.Input.Source.Records()
 
 	for i := range records {
 		newTask := true
