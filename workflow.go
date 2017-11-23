@@ -131,7 +131,7 @@ func (w *Workflow) newTask(records []map[string]string, i int, t *Task, isRepeat
 		HITTypeId:         aws.String(w.MTurk.HitTypeId),
 		MaxAssignments:    aws.Int64(1),
 		Question:          aws.String(t.Question()),
-		LifetimeInSeconds: aws.Int64(86400 * 5),
+		LifetimeInSeconds: aws.Int64(86400), // 1 day
 	})
 
 	if err == nil {
