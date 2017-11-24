@@ -2,11 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -28,7 +27,8 @@ type Workflow struct {
 
 	Fields []Field
 
-	Tasks []Task
+	Tasks map[string]*Task
+
 	MTurk struct {
 		HitTypeId string
 	}
@@ -70,6 +70,10 @@ func (w *Workflow) Config() {
 	fmt.Println(resp)
 
 	w.Input.Init()
+
+	if w.Tasks == nil {
+		w.Tasks = make(map[string]*Task)
+	}
 }
 
 func (w *Workflow) Save() {
@@ -103,98 +107,25 @@ func (w *Workflow) BuildHit() {
 	w.MTurk.HitTypeId = *resp.HITTypeId
 }
 
-func (w *Workflow) newTask(records []map[string]string, i int, t *Task, isRepeat bool) {
-	if !isRepeat {
-		for _, workflowField := range w.Fields {
-			workflowField.Value = records[i][workflowField.Name]
-			fmt.Println(records[i])
-			fmt.Println(records[i][workflowField.Name])
-			t.Fields = append(t.Fields, workflowField)
-		}
-	}
-
-	resp, err := w.client.CreateHITWithHITType(&mturk.CreateHITWithHITTypeInput{
-		HITTypeId:         aws.String(w.MTurk.HitTypeId),
-		MaxAssignments:    aws.Int64(1),
-		Question:          aws.String(t.Question()),
-		LifetimeInSeconds: aws.Int64(86400), // 1 day
-	})
-
-	if err == nil {
-		t.HitID = *resp.HIT.HITId
-		w.Tasks = append(w.Tasks, *t)
-	} else {
-		fmt.Println(err)
-		if r := recover(); r != nil {
-			fmt.Println("Recovered", r)
-		}
-	}
-}
-
-func (w *Workflow) updateTask(records []map[string]string, i int, t *Task) {
-	// UpdateHITTypeOfHIT
-	for field := range t.Fields {
-		f := &t.Fields[field]
-		f.Value = records[i][f.Name]
-	}
-
-	resp, err := w.client.ListAssignmentsForHIT(&mturk.ListAssignmentsForHITInput{
-		HITId: aws.String(t.HitID),
-	})
-
-	fmt.Println(err)
-	fmt.Println(resp)
-
-	allRejected := true
-
-	for _, ass := range resp.Assignments {
-		if *ass.AssignmentStatus != "Rejected" && allRejected {
-			allRejected = false
-		}
-	}
-
-	if allRejected {
-		w.newTask(records, i, t, true)
-	} else {
-		t.MTurk.Assignments = resp.Assignments
-
-		if len(resp.Assignments) > 0 {
-			xml.Unmarshal([]byte(*resp.Assignments[0].Answer), &t.MTurk.QuestionFormAnswers)
-
-			for field := range t.Fields {
-				f := &t.Fields[field]
-
-				for _, answer := range t.MTurk.QuestionFormAnswers.Answer {
-					if f.Name == answer.QuestionIdentifier {
-						f.Value = strings.TrimSpace(answer.FreeText)
-					}
-				}
-			}
-
-		}
-	}
-}
-
 func (w *Workflow) BuildTasks() {
 	records := w.Input.Records()
 
 	for i := range records {
-		newTask := true
+		t, ok := w.Tasks[records[i]["ID"]]
 
-		t := &Task{Title: w.Title, Description: w.Description}
-		t.SourceID = records[i]["ID"]
+		if !ok {
+			log.Println("Creating new task")
 
-		for et := range w.Tasks {
-			if w.Tasks[et].SourceID == t.SourceID {
-				t = &w.Tasks[et]
-				newTask = false
+			t = &Task{
+				Title:       w.Title,
+				Description: w.Description,
+				SourceID:    records[i]["ID"],
 			}
-		}
 
-		if newTask {
-			w.newTask(records, i, t, false)
+			t.New(w, records, i)
 		} else {
-			w.updateTask(records, i, t)
+			log.Println("Updating task")
+			t.Update(w, records, i)
 		}
 
 		w.Save()
@@ -213,14 +144,16 @@ func (w *Workflow) SaveOutput() {
 		header = append(header, w.Fields[i].Name)
 	}
 
-	for _, task := range w.Tasks {
+	for _, t := range w.Tasks {
 		row := make(map[string]string)
-		row["ID"] = task.SourceID
+		row["ID"] = t.SourceID
 
-		for _, field := range task.Fields {
+		for _, field := range t.Fields {
 			row[field.Name] = field.Value
-			rows = append(rows, row)
 		}
+
+		rows = append(rows, row)
+		fmt.Println(rows)
 	}
 
 	w.Output.WriteAll(header, rows)

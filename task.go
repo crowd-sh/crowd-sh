@@ -1,25 +1,21 @@
-// Copyright © 2017 Abhi Yerra <abhi@opszero.com>
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package main
 
 import (
+	"encoding/xml"
 	"fmt"
 	"html"
+	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/mturk"
 )
+
+type questionFormAnswers struct {
+	Answer []struct {
+		QuestionIdentifier string
+		FreeText           string
+	}
+}
 
 type Task struct {
 	// Copied from Workflow
@@ -31,14 +27,8 @@ type Task struct {
 	Fields   []Field
 
 	MTurk struct {
-		QuestionFormAnswers struct {
-			Answer []struct {
-				QuestionIdentifier string
-				FreeText           string
-			}
-		}
-
-		Assignments []*mturk.Assignment
+		QuestionFormAnswers questionFormAnswers
+		Assignments         []*mturk.Assignment
 	}
 }
 
@@ -87,4 +77,66 @@ func (t *Task) Question() string {
   <FrameHeight>1000</FrameHeight>
 </HTMLQuestion>
 `, html.EscapeString(t.Title), html.EscapeString(t.Description), fieldsHTML)
+}
+
+func (t *Task) New(w *Workflow, records []map[string]string, i int) {
+	for _, workflowField := range w.Fields {
+		workflowField.Value = records[i][workflowField.Name]
+		fmt.Println(records[i])
+		fmt.Println(records[i][workflowField.Name])
+		t.Fields = append(t.Fields, workflowField)
+	}
+
+	resp, err := w.client.CreateHITWithHITType(&mturk.CreateHITWithHITTypeInput{
+		HITTypeId:         aws.String(w.MTurk.HitTypeId),
+		MaxAssignments:    aws.Int64(1),
+		Question:          aws.String(t.Question()),
+		LifetimeInSeconds: aws.Int64(86400), // 1 day
+	})
+
+	if err == nil {
+		t.HitID = *resp.HIT.HITId
+		w.Tasks[t.SourceID] = t
+	} else {
+		fmt.Println(err)
+		if r := recover(); r != nil {
+			fmt.Println("Recovered", r)
+		}
+	}
+}
+
+func (t *Task) Update(w *Workflow, records []map[string]string, i int) {
+	// UpdateHITTypeOfHIT
+	for field := range t.Fields {
+		f := &t.Fields[field]
+		f.Value = records[i][f.Name]
+	}
+
+	fmt.Println(t.HitID)
+	resp, err := w.client.ListAssignmentsForHIT(&mturk.ListAssignmentsForHITInput{
+		HITId: aws.String(t.HitID),
+	})
+
+	fmt.Println(err)
+	fmt.Println(resp)
+
+	t.MTurk.Assignments = resp.Assignments
+
+	if len(resp.Assignments) > 0 {
+		var q questionFormAnswers
+
+		xml.Unmarshal([]byte(*resp.Assignments[0].Answer), &q)
+		t.MTurk.QuestionFormAnswers = q
+
+		for field := range t.Fields {
+			f := &t.Fields[field]
+
+			for _, answer := range t.MTurk.QuestionFormAnswers.Answer {
+				if f.Name == answer.QuestionIdentifier {
+					f.Value = strings.TrimSpace(answer.FreeText)
+				}
+			}
+		}
+
+	}
 }

@@ -49,17 +49,22 @@ func (s *SourceConfig) WriteAll(headers []string, rows []map[string]string) {
 	fmt.Println(err)
 	defer file.Close()
 
+	var r [][]string
+
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	writer.Write(headers)
+	r = append(r, headers)
 
 	for _, row := range rows {
-		var r []string
+		var r2 []string
 		for _, header := range headers {
-			r = append(r, row[header])
+			r2 = append(r2, row[header])
 		}
 
-		writer.Write(r)
+		r = append(r, r2)
 	}
+
+	fmt.Println(r)
+	writer.WriteAll(r)
 }
