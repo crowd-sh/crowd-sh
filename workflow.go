@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/csv"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
@@ -24,8 +23,8 @@ type Workflow struct {
 	Tags        string
 	Reward      string
 
-	Input      sources.SourceConfig
-	OutputFile string
+	Input  sources.SourceConfig
+	Output sources.SourceConfig
 
 	Fields []Field
 
@@ -203,30 +202,28 @@ func (w *Workflow) BuildTasks() {
 }
 
 func (w *Workflow) SaveOutput() {
-	file, err := os.Create(w.OutputFile)
-	fmt.Println(err)
-	defer file.Close()
+	var (
+		header []string
+		rows   []map[string]string
+	)
 
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
-
-	var header []string
 	header = []string{"ID"}
 
 	for i := range w.Fields {
 		header = append(header, w.Fields[i].Name)
 	}
-	writer.Write(header)
 
 	for _, task := range w.Tasks {
-		fields := []string{task.SourceID}
+		row := make(map[string]string)
+		row["ID"] = task.SourceID
 
 		for _, field := range task.Fields {
-			fields = append(fields, field.Value)
+			row[field.Name] = field.Value
+			rows = append(rows, row)
 		}
-
-		writer.Write(fields)
 	}
+
+	w.Output.WriteAll(header, rows)
 
 	select {
 	case <-time.After(5 * time.Second):

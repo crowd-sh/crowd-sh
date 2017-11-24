@@ -1,6 +1,11 @@
 package sources
 
-import "log"
+import (
+	"encoding/csv"
+	"fmt"
+	"log"
+	"os"
+)
 
 type SourceType string
 
@@ -37,4 +42,24 @@ func (s *SourceConfig) Headers() []string {
 
 func (s *SourceConfig) Records() []map[string]string {
 	return s.source.Records()
+}
+
+func (s *SourceConfig) WriteAll(headers []string, rows []map[string]string) {
+	file, err := os.Create(s.Config["File"])
+	fmt.Println(err)
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	writer.Write(headers)
+
+	for _, row := range rows {
+		var r []string
+		for _, header := range headers {
+			r = append(r, row[header])
+		}
+
+		writer.Write(r)
+	}
 }
