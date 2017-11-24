@@ -9,14 +9,14 @@ import (
 )
 
 type CSVSource struct {
-	InputFile string
+	Config map[string]string
 
 	columns []string
 	records []map[string]string
 }
 
 func (w *CSVSource) Init() {
-	file, err := ioutil.ReadFile(w.InputFile)
+	file, err := ioutil.ReadFile(w.Config["File"])
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -37,7 +37,7 @@ func (w *CSVSource) Init() {
 	w.records = records
 }
 
-func (w *CSVSource) Columns() []string {
+func (w *CSVSource) Headers() []string {
 	return w.columns
 }
 

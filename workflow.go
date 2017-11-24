@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/mturk"
+
 	"github.com/opszero/workmachine/sources"
 )
 
@@ -23,10 +24,7 @@ type Workflow struct {
 	Tags        string
 	Reward      string
 
-	Input struct {
-		Source sources.Source
-		Type   sources.SourceType
-	}
+	Input      sources.SourceConfig
 	OutputFile string
 
 	Fields []Field
@@ -71,6 +69,8 @@ func (w *Workflow) Config() {
 		fmt.Println(err)
 	}
 	fmt.Println(resp)
+
+	w.Input.Init()
 }
 
 func (w *Workflow) Save() {
@@ -177,7 +177,7 @@ func (w *Workflow) updateTask(records []map[string]string, i int, t *Task) {
 }
 
 func (w *Workflow) BuildTasks() {
-	records := w.Input.Source.Records()
+	records := w.Input.Records()
 
 	for i := range records {
 		newTask := true
