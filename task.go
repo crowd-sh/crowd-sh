@@ -79,11 +79,9 @@ func (t *Task) Question() string {
 `, html.EscapeString(t.Title), html.EscapeString(t.Description), fieldsHTML)
 }
 
-func (t *Task) New(w *Workflow, records []map[string]string, i int) {
+func (t *Task) New(w *Workflow, record map[string]string) {
 	for _, workflowField := range w.Fields {
-		workflowField.Value = records[i][workflowField.Name]
-		fmt.Println(records[i])
-		fmt.Println(records[i][workflowField.Name])
+		workflowField.Value = record[workflowField.Name]
 		t.Fields = append(t.Fields, workflowField)
 	}
 
@@ -112,7 +110,6 @@ func (t *Task) Update(w *Workflow, records []map[string]string, i int) {
 		f.Value = records[i][f.Name]
 	}
 
-	fmt.Println(t.HitID)
 	resp, err := w.client.ListAssignmentsForHIT(&mturk.ListAssignmentsForHITInput{
 		HITId: aws.String(t.HitID),
 	})

@@ -1,22 +1,21 @@
 package sources
 
 import (
-	"encoding/csv"
-	"fmt"
 	"log"
-	"os"
 )
 
 type SourceType string
 
 const (
-	CSVSourceType SourceType = "csv"
+	CSVSourceType  SourceType = "csv"
+	ExecSourceType            = "exec"
 )
 
 type Source interface {
 	Init()
 	Headers() []string
 	Records() []map[string]string
+	WriteAll(headers []string, rows []map[string]string)
 }
 
 type SourceConfig struct {
@@ -26,13 +25,19 @@ type SourceConfig struct {
 	source Source
 }
 
-func (s *SourceConfig) Init() {
+func (s *SourceConfig) setSourceType() {
 	switch s.Type {
 	case CSVSourceType:
-		log.Println("Config CSV Input")
+		log.Println("Config CSV")
 		s.source = &CSVSource{Config: s.Config}
+	case ExecSourceType:
+		log.Println("Config Exec")
+		s.source = &ExecSource{Config: s.Config}
 	}
+}
 
+func (s *SourceConfig) Init() {
+	s.setSourceType()
 	s.source.Init()
 }
 
@@ -45,26 +50,6 @@ func (s *SourceConfig) Records() []map[string]string {
 }
 
 func (s *SourceConfig) WriteAll(headers []string, rows []map[string]string) {
-	file, err := os.Create(s.Config["File"])
-	fmt.Println(err)
-	defer file.Close()
-
-	var r [][]string
-
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
-
-	r = append(r, headers)
-
-	for _, row := range rows {
-		var r2 []string
-		for _, header := range headers {
-			r2 = append(r2, row[header])
-		}
-
-		r = append(r, r2)
-	}
-
-	fmt.Println(r)
-	writer.WriteAll(r)
+	s.setSourceType()
+	s.source.WriteAll(headers, rows)
 }

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	flag "github.com/spf13/pflag"
 )
 
@@ -25,8 +23,6 @@ func main() {
 	w.Config()
 	w.BuildHit()
 	w.Save()
-	go w.SaveOutput()
 	w.BuildTasks()
-
-	time.Sleep(8 * time.Second)
+	w.SaveOutput()
 }

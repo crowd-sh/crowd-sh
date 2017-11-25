@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -111,6 +110,8 @@ func (w *Workflow) BuildTasks() {
 	records := w.Input.Records()
 
 	for i := range records {
+		log.Println("Me", records[i])
+
 		t, ok := w.Tasks[records[i]["ID"]]
 
 		if !ok {
@@ -122,7 +123,7 @@ func (w *Workflow) BuildTasks() {
 				SourceID:    records[i]["ID"],
 			}
 
-			t.New(w, records, i)
+			t.New(w, records[i])
 		} else {
 			log.Println("Updating task")
 			t.Update(w, records, i)
@@ -157,9 +158,4 @@ func (w *Workflow) SaveOutput() {
 	}
 
 	w.Output.WriteAll(header, rows)
-
-	select {
-	case <-time.After(5 * time.Second):
-		fmt.Println("Save")
-	}
 }

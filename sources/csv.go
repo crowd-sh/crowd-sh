@@ -2,8 +2,11 @@ package sources
 
 import (
 	"bytes"
+	"encoding/csv"
 	"fmt"
 	"io/ioutil"
+	"log"
+	"os"
 
 	csvmap "github.com/recursionpharma/go-csv-map"
 )
@@ -43,4 +46,30 @@ func (w *CSVSource) Headers() []string {
 
 func (w *CSVSource) Records() []map[string]string {
 	return w.records
+}
+
+func (s *CSVSource) WriteAll(headers []string, rows []map[string]string) {
+	log.Println("Writing to ", s.Config["File"])
+	file, err := os.Create(s.Config["File"])
+	fmt.Println(err)
+	defer file.Close()
+
+	var r [][]string
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	r = append(r, headers)
+
+	for _, row := range rows {
+		var r2 []string
+		for _, header := range headers {
+			r2 = append(r2, row[header])
+		}
+
+		r = append(r, r2)
+	}
+
+	fmt.Println(r)
+	writer.WriteAll(r)
 }
