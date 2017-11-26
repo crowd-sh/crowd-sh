@@ -27,6 +27,10 @@ type Field struct {
 	Options     []string
 }
 
+func (t Field) String() string {
+	return fmt.Sprintf("%s: %s", t.Name, t.Value)
+}
+
 func (t *Field) TextArea() string {
 	return fmt.Sprintf(`
 		<div class="row">

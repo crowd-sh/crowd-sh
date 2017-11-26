@@ -16,7 +16,7 @@ workmachine config.json
 ### Production
 
 ```
-workmachine config.json live
+workmachine --live config.json
 ```
 
 ## The MIT License (MIT)

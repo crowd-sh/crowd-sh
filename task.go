@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"html"
+	"log"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -136,4 +137,25 @@ func (t *Task) Update(w *Workflow, records []map[string]string, i int) {
 		}
 
 	}
+}
+
+func (t *Task) Approve(w *Workflow) {
+	log.Println("Approve")
+
+	w.client.ApproveAssignment(&mturk.ApproveAssignmentInput{
+		AssignmentId:      t.MTurk.Assignments[0].AssignmentId,
+		RequesterFeedback: aws.String("Great Job"),
+	})
+}
+
+func (t *Task) Reject(w *Workflow) {
+	log.Println("Rejected")
+
+	w.client.RejectAssignment(&mturk.RejectAssignmentInput{
+		AssignmentId:      t.MTurk.Assignments[0].AssignmentId,
+		RequesterFeedback: aws.String("Incorrect Input / Spam"),
+	})
+
+	// So we can remake it.
+	t.HitID = ""
 }

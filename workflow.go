@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -36,7 +37,7 @@ type Workflow struct {
 }
 
 func (w *Workflow) Config() {
-	file, err := ioutil.ReadFile(os.Args[1])
+	file, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		fmt.Printf("File error: %v\n", err)
 		os.Exit(1)
@@ -81,7 +82,7 @@ func (w *Workflow) Save() {
 		panic(err)
 	}
 
-	ioutil.WriteFile(os.Args[1], b, os.ModePerm)
+	ioutil.WriteFile(configFile, b, os.ModePerm)
 }
 
 func (w *Workflow) BuildHit() {
@@ -158,4 +159,58 @@ func (w *Workflow) SaveOutput() {
 	}
 
 	w.Output.WriteAll(header, rows)
+}
+
+func (w *Workflow) ReviewTasks() {
+	workerTasks := make(map[string][]*Task)
+
+	for _, t := range w.Tasks {
+		if len(t.MTurk.Assignments) > 0 && *t.MTurk.Assignments[0].AssignmentStatus == "Submitted" {
+			workerTasks[*t.MTurk.Assignments[0].WorkerId] = append(workerTasks[*t.MTurk.Assignments[0].WorkerId], t)
+		}
+	}
+
+	for workerId, t := range workerTasks {
+		fmt.Println("WorkerID: ", workerId)
+		fmt.Println()
+		for task := range t {
+			for _, f := range t[task].Fields {
+				fmt.Println(f)
+			}
+			fmt.Println()
+		}
+
+		fmt.Println("Batch Review Worker (b), Review Individual (i)")
+
+		switch getchar() {
+		case 'b':
+			fmt.Println("Approve All (a), Reject All (r)")
+
+			switch getchar() {
+			case 'a':
+				for _, workerTask := range t {
+					workerTask.Approve(w)
+				}
+			case 'r':
+				for _, workerTask := range t {
+					workerTask.Reject(w)
+				}
+			}
+		case 'i':
+			// If individual
+			//      Reject and Approve
+
+			fmt.Println("Approve All (a), Reject All (r)")
+		}
+		// Approve All (a), Reject All (r)
+		// if Reject All
+		//     Block Worker
+	}
+}
+
+func getchar() byte {
+	reader := bufio.NewReader(os.Stdin)
+	char, _ := reader.ReadByte()
+
+	return char
 }

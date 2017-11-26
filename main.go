@@ -5,7 +5,9 @@ import (
 )
 
 var (
-	isLive bool
+	isLive     bool
+	isReview   bool
+	configFile string
 )
 
 const (
@@ -15,14 +17,22 @@ const (
 
 func init() {
 	flag.BoolVar(&isLive, "live", false, "Live on Mechanical Turk.")
+	flag.BoolVar(&isReview, "review", false, "Review Work.")
 	flag.Parse()
 }
 
 func main() {
+	configFile = flag.Arg(0)
+
 	w := &Workflow{}
 	w.Config()
-	w.BuildHit()
-	w.Save()
-	w.BuildTasks()
-	w.SaveOutput()
+
+	if isReview {
+		w.ReviewTasks()
+	} else {
+		w.BuildHit()
+		w.Save()
+		w.BuildTasks()
+		w.SaveOutput()
+	}
 }
