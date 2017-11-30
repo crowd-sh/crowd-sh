@@ -33,28 +33,28 @@ func (t Field) String() string {
 
 func (t *Field) TextArea() string {
 	return fmt.Sprintf(`
-		<div class="row">
-		<div class="col-md-12">
-		  <h2>%s</h2>
-		  <p>%s</p>
-		  <p>
-			<textarea name='%s' class="form-control" cols='80' rows='3'>%s</textarea>
-		  </p>
-		</div>
-		</div>`, html.EscapeString(t.Name), html.EscapeString(t.Description), t.Name, t.Value)
+    <div class="row">
+    <div class="col-md-12">
+      <h2>%s</h2>
+      <p>%s</p>
+      <p>
+      <textarea name='%s' class="form-control" cols='80' rows='3'>%s</textarea>
+      </p>
+    </div>
+    </div>`, html.EscapeString(t.Name), html.EscapeString(t.Description), t.Name, t.Value)
 }
 
 func (t *Field) TextField() string {
 	return fmt.Sprintf(`
-		<div class="row">
-		<div class="col-md-12">
-		  <h2>%s</h2>
-		  <p>%s</p>
-		  <p>
-			<input type="text" class="form-control" name="%s" value="%s" />
-		  </p>
-		</div>
-		</div>`, html.EscapeString(t.Name), html.EscapeString(t.Description), t.Name, t.Value)
+    <div class="row">
+    <div class="col-md-12">
+      <h2>%s</h2>
+      <p>%s</p>
+      <p>
+      <input type="text" class="form-control" name="%s" value="%s" />
+      </p>
+    </div>
+    </div>`, html.EscapeString(t.Name), html.EscapeString(t.Description), t.Name, t.Value)
 }
 
 func (t *Field) SelectField() string {
@@ -65,17 +65,17 @@ func (t *Field) SelectField() string {
 	}
 
 	return fmt.Sprintf(`
-		<div class="row">
-		<div class="col-md-12">
-		  <h2>%s</h2>
-		  <p>%s</p>
-		  <p>
-		  	<select name="%s" class="form-control">
-				%s
-			</select>
-		  </p>
-		</div>
-		</div>`, html.EscapeString(t.Name), html.EscapeString(t.Description), t.Name, options)
+    <div class="row">
+    <div class="col-md-12">
+      <h2>%s</h2>
+      <p>%s</p>
+      <p>
+        <select name="%s" class="form-control">
+        %s
+      </select>
+      </p>
+    </div>
+    </div>`, html.EscapeString(t.Name), html.EscapeString(t.Description), t.Name, options)
 }
 
 func (t *Field) RadioFields() string {
@@ -86,15 +86,19 @@ func (t *Field) RadioFields() string {
 	}
 
 	return fmt.Sprintf(`
-		<div class="row">
-		<div class="col-md-12">
-		  <h2>%s</h2>
-		  <p>%s</p>
-		  <p>
-			%s
-		  </p>
-		</div>
-		</div>`, html.EscapeString(t.Name), html.EscapeString(t.Description), t.Name, options)
+    <div class="row">
+    <div class="col-md-12">
+      <h2>%s</h2>
+      <p>%s</p>
+      <p>
+      %s
+      </p>
+    </div>
+    </div>`, html.EscapeString(t.Name), html.EscapeString(t.Description), t.Name, options)
+}
+
+func (t *Field) HiddenField() string {
+	return fmt.Sprintf(`<input type="hidden" name="%s" value="%s" />`, t.Name, t.Value)
 }
 
 func (t *Field) HTML() string {
@@ -107,6 +111,8 @@ func (t *Field) HTML() string {
 		return t.SelectField()
 	case "Radio":
 		return t.RadioFields()
+	case "Hidden":
+		return t.HiddenField()
 	}
 
 	return t.TextArea()

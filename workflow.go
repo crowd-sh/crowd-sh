@@ -127,7 +127,7 @@ func (w *Workflow) BuildTasks() {
 			t.New(w, records[i])
 		} else {
 			log.Println("Updating task")
-			t.Update(w, records, i)
+			t.Update(w, records[i])
 		}
 
 		w.Save()
@@ -147,15 +147,16 @@ func (w *Workflow) SaveOutput() {
 	}
 
 	for _, t := range w.Tasks {
-		row := make(map[string]string)
-		row["ID"] = t.SourceID
+		if len(t.MTurk.Assignments) > 0 {
+			row := make(map[string]string)
+			row["ID"] = t.SourceID
 
-		for _, field := range t.Fields {
-			row[field.Name] = field.Value
+			for _, field := range t.Fields {
+				row[field.Name] = field.Value
+			}
+
+			rows = append(rows, row)
 		}
-
-		rows = append(rows, row)
-		fmt.Println(rows)
 	}
 
 	w.Output.WriteAll(header, rows)
@@ -172,39 +173,28 @@ func (w *Workflow) ReviewTasks() {
 
 	for workerId, t := range workerTasks {
 		fmt.Println("WorkerID: ", workerId)
-		fmt.Println()
-		for task := range t {
-			for _, f := range t[task].Fields {
+		fmt.Printf(`aws --region us-east-1 --profile opszero_mturk mturk create-worker-block --worker-id %s --reason "Spammy Work, Incorrect Work"`, workerId)
+		fmt.Println("\n")
+		for _, task := range t {
+			for _, f := range task.Fields {
 				fmt.Println(f)
 			}
-			fmt.Println()
+			fmt.Printf(`aws --region us-east-1 --profile opszero_mturk mturk reject-assignment --assignment-id %s --requester-feedback "Didn't do work"`, *task.MTurk.Assignments[0].AssignmentId)
+			fmt.Println("\n")
 		}
 
-		fmt.Println("Batch Review Worker (b), Review Individual (i)")
+		fmt.Println("Approve All (a), Reject All (r), Next (n)")
 
 		switch getchar() {
-		case 'b':
-			fmt.Println("Approve All (a), Reject All (r)")
-
-			switch getchar() {
-			case 'a':
-				for _, workerTask := range t {
-					workerTask.Approve(w)
-				}
-			case 'r':
-				for _, workerTask := range t {
-					workerTask.Reject(w)
-				}
+		case 'a':
+			for _, workerTask := range t {
+				workerTask.Approve(w)
 			}
-		case 'i':
-			// If individual
-			//      Reject and Approve
-
-			fmt.Println("Approve All (a), Reject All (r)")
+		case 'r':
+			for _, workerTask := range t {
+				workerTask.Reject(w)
+			}
 		}
-		// Approve All (a), Reject All (r)
-		// if Reject All
-		//     Block Worker
 	}
 }
 
@@ -213,4 +203,11 @@ func getchar() byte {
 	char, _ := reader.ReadByte()
 
 	return char
+}
+
+func (w *Workflow) ExpireTasks() {
+	for _, t := range w.Tasks {
+		t.Expire(w)
+		w.Save()
+	}
 }

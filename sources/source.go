@@ -51,5 +51,7 @@ func (s *SourceConfig) Records() []map[string]string {
 
 func (s *SourceConfig) WriteAll(headers []string, rows []map[string]string) {
 	s.setSourceType()
+
+	log.Println(rows)
 	s.source.WriteAll(headers, rows)
 }

@@ -1,3 +1,6 @@
+Note: This is under active development, there are no tests, and behavior can be eratic.
+We are working on making it better but until then here be demons.
+
 # WorkMachine
 
 WorkMachine allows you to run crowdsourced workflows involving human
@@ -9,19 +12,74 @@ to define arbitrary workflows which require human workers.
 
 ## Usage
 
+### Config
+
 ```
-workmachine config.json
+{
+    "Title": "Find Information for Company",
+    "Description": "Find the Company URL information for the information provided. Incorrect information will be REJECTED.",
+    "Tags": "research,data,company,leads",
+    "Reward": "0.03",
+    "Input": {
+        "Config": {
+            "File": "organization_26-11-2017_21_53_04_b9928afd8746d4d55a9ee56c70b275450c16d1aeb2a75deeb6014ba234b12bc5.csv"
+        },
+        "Type": "csv"
+    },
+    "Output": {
+        "Config": {
+            "Command": "bundle exec rake pipedrive:update"
+        },
+        "Type": "exec"
+    },
+    "Fields": [
+        {
+            "Name": "Company Name",
+            "Type": "ShortText",
+            "Description": "Use the company name to fill out the fields below.",
+            "Value": "",
+            "Options": null
+        },
+        {
+            "Name": "Company Website",
+            "Type": "ShortText",
+            "Description": "Insert the company website if it doesn't exist. Find the company name using Google.",
+            "Value": "",
+            "Options": null
+        },
+        {
+            "Name": "Company LinkedIn",
+            "Type": "ShortText",
+            "Description": "Use LinkedIn. Find the Company's LinkedIn url here. Put 'not found' if you cannot find the information. ",
+            "Value": "",
+            "Options": null
+        }
+    ]
+}
+```
+
+### Staging
+```
+workmachine --review config.json
 ```
 
 ### Production
 
 ```
-workmachine --live config.json
+workmachine --live --review --output config.json
 ```
+
+# Project by opsZero
+
+<a href="https://www.opszero.com"><img src="http://assets.opszero.com.s3.amazonaws.com/images/opszero_11_29_2016.png" width="300px"/></a>
+
+This project is brought to you by [opsZero](https://www.opszero.com) we
+provide DevOps and Cloud Infrastructure as a Service for Startups. If you
+need help with your infrastructure reach out.
 
 ## The MIT License (MIT)
 
-Copyright (c) 2012-2017 Abhi Yerra <abhi@berkeley.edu>
+Copyright (c) 2012-2017 opsZero <abhi@opszero.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

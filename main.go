@@ -7,6 +7,8 @@ import (
 var (
 	isLive     bool
 	isReview   bool
+	isExpire   bool
+	output     bool
 	configFile string
 )
 
@@ -18,6 +20,8 @@ const (
 func init() {
 	flag.BoolVar(&isLive, "live", false, "Live on Mechanical Turk.")
 	flag.BoolVar(&isReview, "review", false, "Review Work.")
+	flag.BoolVar(&isExpire, "expire", false, "Expire Work.")
+	flag.BoolVar(&output, "output", false, "Output Work.")
 	flag.Parse()
 }
 
@@ -27,12 +31,18 @@ func main() {
 	w := &Workflow{}
 	w.Config()
 
-	if isReview {
-		w.ReviewTasks()
+	if isExpire {
+		w.ExpireTasks()
 	} else {
 		w.BuildHit()
 		w.Save()
 		w.BuildTasks()
-		w.SaveOutput()
+		if isReview {
+			w.ReviewTasks()
+		}
+
+		if output {
+			w.SaveOutput()
+		}
 	}
 }

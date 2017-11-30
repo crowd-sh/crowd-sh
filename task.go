@@ -6,6 +6,7 @@ import (
 	"html"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/mturk"
@@ -28,6 +29,7 @@ type Task struct {
 	Fields   []Field
 
 	MTurk struct {
+		HIT                 *mturk.HIT
 		QuestionFormAnswers questionFormAnswers
 		Assignments         []*mturk.Assignment
 	}
@@ -95,6 +97,7 @@ func (t *Task) New(w *Workflow, record map[string]string) {
 
 	if err == nil {
 		t.HitID = *resp.HIT.HITId
+		t.MTurk.HIT = resp.HIT
 		w.Tasks[t.SourceID] = t
 	} else {
 		fmt.Println(err)
@@ -104,11 +107,13 @@ func (t *Task) New(w *Workflow, record map[string]string) {
 	}
 }
 
-func (t *Task) Update(w *Workflow, records []map[string]string, i int) {
+func (t *Task) Update(w *Workflow, record map[string]string) {
 	// UpdateHITTypeOfHIT
-	for field := range t.Fields {
-		f := &t.Fields[field]
-		f.Value = records[i][f.Name]
+	if record != nil {
+		for field := range t.Fields {
+			f := &t.Fields[field]
+			f.Value = record[f.Name]
+		}
 	}
 
 	resp, err := w.client.ListAssignmentsForHIT(&mturk.ListAssignmentsForHITInput{
@@ -137,6 +142,13 @@ func (t *Task) Update(w *Workflow, records []map[string]string, i int) {
 		}
 
 	}
+
+	// Clear out old hits
+	// if t.MTurk.HIT != nil && len(resp.Assignments) == 0 {
+	// 	if time.Now() > *t.MTurk.HIT.Expiration {
+	// 		t.HitID = ""
+	// 	}
+	// }
 }
 
 func (t *Task) Approve(w *Workflow) {
@@ -157,5 +169,17 @@ func (t *Task) Reject(w *Workflow) {
 	})
 
 	// So we can remake it.
+	t.HitID = ""
+}
+
+func (t *Task) Expire(w *Workflow) {
+	if len(t.MTurk.Assignments) == 0 || (len(t.MTurk.Assignments) > 0 && (*t.MTurk.Assignments[0].AssignmentStatus != "Approved" && *t.MTurk.Assignments[0].AssignmentStatus != "Submitted")) {
+		log.Println(t.HitID)
+		w.client.UpdateExpirationForHIT(&mturk.UpdateExpirationForHITInput{
+			ExpireAt: aws.Time(time.Now().AddDate(0, 0, -1)),
+			HITId:    aws.String(t.HitID),
+		})
+	}
+
 	t.HitID = ""
 }

@@ -64,8 +64,8 @@ func (w *ExecSource) WriteAll(headers []string, rows []map[string]string) {
 	}()
 
 	out, err := cmd.CombinedOutput()
+	fmt.Println(string(out))
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(string(out))
 }
