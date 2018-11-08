@@ -19,7 +19,6 @@ const (
 
 func init() {
 	flag.BoolVar(&isLive, "live", false, "Live on Mechanical Turk.")
-	flag.BoolVar(&isReview, "review", false, "Review Work.")
 	flag.BoolVar(&isExpire, "expire", false, "Expire Work.")
 	flag.BoolVar(&output, "output", false, "Output Work.")
 	flag.Parse()
@@ -32,17 +31,11 @@ func main() {
 	w.Config()
 
 	if isExpire {
-		w.ExpireTasks()
+		//w.ExpireTasks()
 	} else {
-		w.BuildHit()
+		w.BuildHitType()
 		w.Save()
-		w.BuildTasks()
-		if isReview {
-			w.ReviewTasks()
-		}
-
-		if output {
-			w.SaveOutput()
-		}
+		w.Sync()
+		w.Save()
 	}
 }
