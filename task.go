@@ -42,15 +42,12 @@ func (t *Task) Question() string {
 			continue
 		}
 
-		var field Field
 		for _, ft := range t.workflow.FieldTypes {
 			if ft.Name == k {
-				field = ft
+				ft.Value = v
+				fieldsHTML += ft.HTML()
 			}
 		}
-
-		field.Value = v
-		fieldsHTML += field.HTML()
 	}
 
 	return fmt.Sprintf(`
