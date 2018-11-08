@@ -38,6 +38,10 @@ type Task struct {
 func (t *Task) Question() string {
 	var fieldsHTML string
 	for _, ft := range t.workflow.FieldTypes {
+		if ft.Name == MTurkHitIDField {
+			continue
+		}
+
 		var field *Field
 
 		for k, v := range t.Fields {
@@ -145,6 +149,10 @@ func (t *Task) Sync(w *Workflow) {
 
 			log.Println("Hi")
 			for _, answer := range t.MTurk.QuestionFormAnswers.Answer {
+				if answer.QuestionIdentifier == MTurkHitIDField {
+					continue
+				}
+
 				log.Println("Answer", answer)
 				t.Fields[answer.QuestionIdentifier] = strings.TrimSpace(answer.FreeText)
 			}
