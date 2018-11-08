@@ -21,6 +21,9 @@ type Workflow struct {
 	Tags        string
 	Reward      string
 
+	AWSProfile string
+	Live       bool
+
 	AirTable struct {
 		Base  string
 		API   string
@@ -52,15 +55,15 @@ func (w *Workflow) Config() {
 	}
 
 	endpoint := SandboxEndpoint
-	if isLive {
+	if w.Live {
 		endpoint = LiveEndpoint
 	}
 
-	fmt.Println("Endpoint:", endpoint)
+	fmt.Println("Endpoint:", endpoint, w.AWSProfile)
 
 	sess := session.Must(session.NewSession())
 	w.client = mturk.New(sess, &aws.Config{
-		Credentials: credentials.NewSharedCredentials("/Users/abhi/.aws/credentials", "opszero_mturk"),
+		Credentials: credentials.NewSharedCredentials("", w.AWSProfile),
 		Endpoint:    aws.String(endpoint),
 		Region:      aws.String("us-east-1"),
 	})
@@ -105,11 +108,10 @@ func (w *Workflow) BuildHitType() {
 
 const (
 	MTurkHitIDField = "__MTurkID"
-	MTurkDataField  = "__MTurkData"
 )
 
 func (w *Workflow) AddAirtableField() {
-	for _, neededField := range []string{MTurkDataField, MTurkHitIDField} {
+	for _, neededField := range []string{MTurkHitIDField} {
 		hasField := false
 		for i := range w.FieldTypes {
 			if w.FieldTypes[i].Name == neededField {

@@ -5,10 +5,8 @@ import (
 )
 
 var (
-	isLive     bool
 	isReview   bool
 	isExpire   bool
-	output     bool
 	configFile string
 )
 
@@ -18,9 +16,7 @@ const (
 )
 
 func init() {
-	flag.BoolVar(&isLive, "live", false, "Live on Mechanical Turk.")
 	flag.BoolVar(&isExpire, "expire", false, "Expire Work.")
-	flag.BoolVar(&output, "output", false, "Output Work.")
 	flag.Parse()
 }
 

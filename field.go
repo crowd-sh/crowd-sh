@@ -101,6 +101,14 @@ func (t *Field) HiddenField() string {
 	return fmt.Sprintf(`<input type="hidden" name="%s" value="%s" />`, t.Name, t.Value)
 }
 
+func (t *Field) Label() string {
+	return fmt.Sprintf(`<p><strong>%s:</strong><br/>%s</p>`, t.Name, t.Value)
+}
+
+func (t *Field) Image() string {
+	return fmt.Sprintf(`<p><strong>%s:</strong><br/><img src="%s" /></p>`, t.Name, t.Value)
+}
+
 func (t *Field) HTML() string {
 	switch t.Type {
 	case "LongText":
@@ -113,6 +121,10 @@ func (t *Field) HTML() string {
 		return t.RadioFields()
 	case "Hidden":
 		return t.HiddenField()
+	case "Label":
+		return t.Label()
+	case "Image":
+		return t.Image()
 	}
 
 	return t.TextArea()
