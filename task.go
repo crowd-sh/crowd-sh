@@ -1,15 +1,18 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/xml"
 	"fmt"
 	"html"
 	"log"
 	"strings"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/mturk"
+
+	"golang.org/x/net/html/charset"
 )
 
 type questionFormAnswers struct {
@@ -20,13 +23,10 @@ type questionFormAnswers struct {
 }
 
 type Task struct {
-	// Copied from Workflow
-	Title       string
-	Description string
+	workflow *Workflow
 
-	HitID    string
-	SourceID string
-	Fields   []Field
+	AirtableID string `json:"id"`
+	Fields     map[string]string
 
 	MTurk struct {
 		HIT                 *mturk.HIT
@@ -37,8 +37,20 @@ type Task struct {
 
 func (t *Task) Question() string {
 	var fieldsHTML string
-	for i := range t.Fields {
-		fieldsHTML += t.Fields[i].HTML()
+	for k, v := range t.Fields {
+		if k == MTurkDataField || k == MTurkHitIDField {
+			continue
+		}
+
+		var field Field
+		for _, ft := range t.workflow.FieldTypes {
+			if ft.Name == k {
+				field = ft
+			}
+		}
+
+		field.Value = v
+		fieldsHTML += field.HTML()
 	}
 
 	return fmt.Sprintf(`
@@ -79,107 +91,113 @@ func (t *Task) Question() string {
   </HTMLContent>
   <FrameHeight>1000</FrameHeight>
 </HTMLQuestion>
-`, html.EscapeString(t.Title), html.EscapeString(t.Description), fieldsHTML)
+`, html.EscapeString(t.workflow.Title), html.EscapeString(t.workflow.Description), fieldsHTML)
 }
 
-func (t *Task) New(w *Workflow, record map[string]string) {
-	for _, workflowField := range w.Fields {
-		workflowField.Value = record[workflowField.Name]
-		t.Fields = append(t.Fields, workflowField)
-	}
+func (t *Task) Sync(w *Workflow) {
+	t.workflow = w
 
-	resp, err := w.client.CreateHITWithHITType(&mturk.CreateHITWithHITTypeInput{
-		HITTypeId:         aws.String(w.MTurk.HitTypeId),
-		MaxAssignments:    aws.Int64(1),
-		Question:          aws.String(t.Question()),
-		LifetimeInSeconds: aws.Int64(86400), // 1 day
-	})
-
-	if err == nil {
-		t.HitID = *resp.HIT.HITId
-		t.MTurk.HIT = resp.HIT
-		w.Tasks[t.SourceID] = t
-	} else {
-		fmt.Println(err)
-		if r := recover(); r != nil {
-			fmt.Println("Recovered", r)
-		}
-	}
-}
-
-func (t *Task) Update(w *Workflow, record map[string]string) {
-	// UpdateHITTypeOfHIT
-	if record != nil {
-		for field := range t.Fields {
-			f := &t.Fields[field]
-			f.Value = record[f.Name]
-		}
-	}
-
-	resp, err := w.client.ListAssignmentsForHIT(&mturk.ListAssignmentsForHITInput{
-		HITId: aws.String(t.HitID),
-	})
-
-	fmt.Println(err)
-	fmt.Println(resp)
-
-	t.MTurk.Assignments = resp.Assignments
-
-	if len(resp.Assignments) > 0 {
-		var q questionFormAnswers
-
-		xml.Unmarshal([]byte(*resp.Assignments[0].Answer), &q)
-		t.MTurk.QuestionFormAnswers = q
-
-		for field := range t.Fields {
-			f := &t.Fields[field]
-
-			for _, answer := range t.MTurk.QuestionFormAnswers.Answer {
-				if f.Name == answer.QuestionIdentifier {
-					f.Value = strings.TrimSpace(answer.FreeText)
-				}
-			}
-		}
-
-	}
-
-	// Clear out old hits
-	// if t.MTurk.HIT != nil && len(resp.Assignments) == 0 {
-	// 	if time.Now() > *t.MTurk.HIT.Expiration {
-	// 		t.HitID = ""
-	// 	}
-	// }
-}
-
-func (t *Task) Approve(w *Workflow) {
-	log.Println("Approve")
-
-	w.client.ApproveAssignment(&mturk.ApproveAssignmentInput{
-		AssignmentId:      t.MTurk.Assignments[0].AssignmentId,
-		RequesterFeedback: aws.String("Great Job"),
-	})
-}
-
-func (t *Task) Reject(w *Workflow) {
-	log.Println("Rejected")
-
-	w.client.RejectAssignment(&mturk.RejectAssignmentInput{
-		AssignmentId:      t.MTurk.Assignments[0].AssignmentId,
-		RequesterFeedback: aws.String("Incorrect Input / Spam"),
-	})
-
-	// So we can remake it.
-	t.HitID = ""
-}
-
-func (t *Task) Expire(w *Workflow) {
-	if len(t.MTurk.Assignments) == 0 || (len(t.MTurk.Assignments) > 0 && (*t.MTurk.Assignments[0].AssignmentStatus != "Approved" && *t.MTurk.Assignments[0].AssignmentStatus != "Submitted")) {
-		log.Println(t.HitID)
-		w.client.UpdateExpirationForHIT(&mturk.UpdateExpirationForHITInput{
-			ExpireAt: aws.Time(time.Now().AddDate(0, 0, -1)),
-			HITId:    aws.String(t.HitID),
+	if t.Fields[MTurkHitIDField] == "" {
+		log.Println("New")
+		resp, err := w.client.CreateHITWithHITType(&mturk.CreateHITWithHITTypeInput{
+			HITTypeId:         aws.String(w.MTurk.HitTypeId),
+			MaxAssignments:    aws.Int64(1),
+			Question:          aws.String(t.Question()),
+			LifetimeInSeconds: aws.Int64(86400), // 1 day
 		})
+
+		if err == nil {
+			t.Fields[MTurkHitIDField] = *resp.HIT.HITId
+			t.Save()
+		} else {
+			fmt.Println(err)
+			if r := recover(); r != nil {
+				fmt.Println("Recovered", r)
+			}
+			t.Save()
+		}
+	} else {
+		log.Println("Update")
+
+		resp, err := w.client.ListAssignmentsForHIT(&mturk.ListAssignmentsForHITInput{
+			HITId: aws.String(t.Fields[MTurkHitIDField]),
+		})
+
+		fmt.Println(err)
+		fmt.Println(resp)
+
+		if len(resp.Assignments) > 0 {
+			var q questionFormAnswers
+
+			b := bytes.NewBufferString(*resp.Assignments[0].Answer)
+			decoder := xml.NewDecoder(bufio.NewReader(b))
+			decoder.CharsetReader = charset.NewReaderLabel
+			err = decoder.Decode(&q)
+
+			// err := xml.Unmarshal(, &q)
+			if err != nil {
+				log.Println(err)
+			}
+			t.MTurk.QuestionFormAnswers = q
+
+			log.Println("Hi")
+			for _, answer := range t.MTurk.QuestionFormAnswers.Answer {
+				log.Println("Answer", answer)
+				t.Fields[answer.QuestionIdentifier] = strings.TrimSpace(answer.FreeText)
+			}
+
+			log.Println("ID", t.AirtableID)
+		}
+
+		t.Save()
+
+	}
+}
+
+func (t *Task) Save() {
+	updatedFields := make(map[string]interface{})
+
+	for k, v := range t.Fields {
+		updatedFields[k] = v
 	}
 
-	t.HitID = ""
+	log.Println(updatedFields)
+
+	if err := t.workflow.AirTable.client.UpdateRecord(t.workflow.AirTable.Table, t.AirtableID, updatedFields, t); err != nil {
+		panic(err)
+	}
+
 }
+
+// func (t *Task) Approve(w *Workflow) {
+// 	log.Println("Approve")
+
+// 	w.client.ApproveAssignment(&mturk.ApproveAssignmentInput{
+// 		AssignmentId:      t.MTurk.Assignments[0].AssignmentId,
+// 		RequesterFeedback: aws.String("Great Job"),
+// 	})
+// }
+
+// func (t *Task) Reject(w *Workflow) {
+// 	log.Println("Rejected")
+
+// 	w.client.RejectAssignment(&mturk.RejectAssignmentInput{
+// 		AssignmentId:      t.MTurk.Assignments[0].AssignmentId,
+// 		RequesterFeedback: aws.String("Incorrect Input / Spam"),
+// 	})
+
+// 	// So we can remake it.
+// 	t.HitID = ""
+// }
+
+// func (t *Task) Expire(w *Workflow) {
+// 	if len(t.MTurk.Assignments) == 0 || (len(t.MTurk.Assignments) > 0 && (*t.MTurk.Assignments[0].AssignmentStatus != "Approved" && *t.MTurk.Assignments[0].AssignmentStatus != "Submitted")) {
+// 		log.Println(t.HitID)
+// 		w.client.UpdateExpirationForHIT(&mturk.UpdateExpirationForHITInput{
+// 			ExpireAt: aws.Time(time.Now().AddDate(0, 0, -1)),
+// 			HITId:    aws.String(t.HitID),
+// 		})
+// 	}
+
+// 	t.HitID = ""
+// }

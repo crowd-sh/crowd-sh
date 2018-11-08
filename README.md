@@ -20,25 +20,16 @@ to define arbitrary workflows which require human workers.
     "Description": "Find the Company URL information for the information provided. Incorrect information will be REJECTED.",
     "Tags": "research,data,company,leads",
     "Reward": "0.03",
-    "Input": {
-        "Config": {
-            "File": "organization_26-11-2017_21_53_04_b9928afd8746d4d55a9ee56c70b275450c16d1aeb2a75deeb6014ba234b12bc5.csv"
-        },
-        "Type": "csv"
-    },
-    "Output": {
-        "Config": {
-            "Command": "bundle exec rake pipedrive:update"
-        },
-        "Type": "exec"
+    "AirTable": {
+        "Base": "basename",
+        "API": "API",
+        "Table": "Table"
     },
     "Fields": [
         {
             "Name": "Company Name",
             "Type": "ShortText",
             "Description": "Use the company name to fill out the fields below.",
-            "Value": "",
-            "Options": null
         },
         {
             "Name": "Company Website",
