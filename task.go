@@ -37,17 +37,23 @@ type Task struct {
 
 func (t *Task) Question() string {
 	var fieldsHTML string
-	for k, v := range t.Fields {
-		if k == MTurkDataField || k == MTurkHitIDField {
-			continue
-		}
+	for _, ft := range t.workflow.FieldTypes {
+		var field *Field
 
-		for _, ft := range t.workflow.FieldTypes {
+		for k, v := range t.Fields {
 			if ft.Name == k {
-				ft.Value = v
-				fieldsHTML += ft.HTML()
+				field = &ft
+				field.Value = v
 			}
 		}
+
+		if field == nil {
+			field = &ft
+		}
+
+		log.Println(field)
+
+		fieldsHTML += field.HTML()
 	}
 
 	return fmt.Sprintf(`
