@@ -12,8 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/mturk"
-
-	"github.com/opszero/workmachine/sources"
 )
 
 type Workflow struct {
@@ -94,10 +92,10 @@ func (w *Workflow) BuildHit() {
 	resp, err := w.client.CreateHITType(&mturk.CreateHITTypeInput{
 		AssignmentDurationInSeconds: aws.Int64(3000),
 		AutoApprovalDelayInSeconds:  aws.Int64(86400),
-		Title:       aws.String(w.Title),
-		Description: aws.String(w.Description),
-		Keywords:    aws.String(w.Tags),
-		Reward:      aws.String(w.Reward),
+		Title:                       aws.String(w.Title),
+		Description:                 aws.String(w.Description),
+		Keywords:                    aws.String(w.Tags),
+		Reward:                      aws.String(w.Reward),
 	})
 
 	if err != nil {
