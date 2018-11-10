@@ -155,32 +155,6 @@ func (w *Workflow) Sync() {
 	}
 }
 
-// func (w *Workflow) SaveOutput() {
-// 	var (
-// 		header []string
-// 		rows   []map[string]string
-// 	)
-
-// 	header = []string{"ID"}
-
-// 	for i := range w.Fields {
-// 		header = append(header, w.Fields[i].Name)
-// 	}
-
-// 	for _, t := range w.Tasks {
-// 		if len(t.MTurk.Assignments) > 0 {
-// 			row := make(map[string]string)
-// 			row["ID"] = t.SourceID
-
-// 			for _, field := range t.Fields {
-// 				row[field.Name] = field.Value
-// 			}
-
-// 			rows = append(rows, row)
-// 		}
-// 	}
-// }
-
 // func (w *Workflow) ReviewTasks() {
 // 	workerTasks := make(map[string][]*Task)
 
