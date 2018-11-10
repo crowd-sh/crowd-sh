@@ -1,6 +1,6 @@
 install:
 	go build && go install
 
-docker:
+release:
 	docker build -t workmachine/workmachine .
 	docker push workmachine/workmachine
