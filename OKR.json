@@ -1,7 +1,7 @@
 {
     "Name": "WorkMachine",
     "Vision": "Make it really easy to create MTurk Tasks and get work done quickly.",
-    "OKRs": {
+    "OKR": {
         "Q4": {
             "Objective": "Rapidly Create New HITs and Launch Them on MTurk.",
             "KeyResults": [{
@@ -15,24 +15,24 @@
     },
     "Projects": [{
         "Name": "Product",
-        "OKRs": {
+        "OKR": {
             "Q4": {
                 "Objective": "Simple usage for multiple different types of tasks.",
                 "KeyResults": [{
-                    "Metric": "Create Nested Tables to Collect New Data"
-                },
-                {
-                    "Metric": "Create 3 different examples to show people."
-                }]
+                        "Metric": "Create Nested Tables to Collect New Data"
+                    },
+                    {
+                        "Metric": "Create 3 different examples to show people."
+                    }
+                ]
             }
         }
     }, {
         "Name": "Marketing",
-        "OKRs": {
+        "OKR": {
             "Q4": {
                 "Objective": "Make it easy for people to start.",
-                "KeyResults": [
-                    {
+                "KeyResults": [{
                         "Metric": "Publish on Hacker News and get 20 Stars"
                     },
                     {
