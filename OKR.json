@@ -1,0 +1,45 @@
+{
+    "Name": "WorkMachine",
+    "Vision": "Make it really easy to create MTurk Tasks and get work done quickly.",
+    "OKRs": {
+        "Q4": {
+            "Objective": "Rapidly Create New HITs and Launch Them on MTurk.",
+            "KeyResults": [{
+                    "Metric": "Launch a New Campaign within 10 Minutes"
+                },
+                {
+                    "Metric": "Have 2 different backends: Airtable, PostgreSQL"
+                }
+            ]
+        }
+    },
+    "Projects": [{
+        "Name": "Product",
+        "OKRs": {
+            "Q4": {
+                "Objective": "Simple usage for multiple different types of tasks.",
+                "KeyResults": [{
+                    "Metric": "Create Nested Tables to Collect New Data"
+                },
+                {
+                    "Metric": "Create 3 different examples to show people."
+                }]
+            }
+        }
+    }, {
+        "Name": "Marketing",
+        "OKRs": {
+            "Q4": {
+                "Objective": "Make it easy for people to start.",
+                "KeyResults": [
+                    {
+                        "Metric": "Publish on Hacker News and get 20 Stars"
+                    },
+                    {
+                        "Metric": "Launch DataCleanupGuy.com as a business."
+                    }
+                ]
+            }
+        }
+    }]
+}
