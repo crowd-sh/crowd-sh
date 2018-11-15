@@ -20,6 +20,7 @@ to define arbitrary workflows which require human workers.
     "Description": "Find the Company URL information for the information provided. Incorrect information will be REJECTED.",
     "Tags": "research,data,company,leads",
     "Reward": "0.03",
+    "Live": false,
     "AirTable": {
         "Base": "basename",
         "API": "API",
@@ -49,15 +50,12 @@ to define arbitrary workflows which require human workers.
 }
 ```
 
-### Staging
-```
-workmachine --review config.json
-```
+### Launch
 
-### Production
+Ensure that there is a field called `__MTurkID` in Airtable.
 
 ```
-workmachine --live --review --output config.json
+workmachine ./config.json
 ```
 
 # Project by opsZero
@@ -70,7 +68,7 @@ need help with your infrastructure reach out.
 
 ## The MIT License (MIT)
 
-Copyright (c) 2012-2017 opsZero <abhi@opszero.com>
+Copyright (c) 2012-2018 opsZero <abhi@opszero.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
