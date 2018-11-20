@@ -1,6 +1,3 @@
-Note: This is under active development, there are no tests, and behavior can be eratic.
-We are working on making it better but until then here be demons.
-
 # WorkMachine
 
 WorkMachine allows you to run crowdsourced workflows involving human
@@ -11,6 +8,8 @@ then be used to train the OCR algorithm. The engine is generic enough
 to define arbitrary workflows which require human workers.
 
 ## Usage
+
+Check out the [samples](./samples) directory for different usage patterns.
 
 ### Config
 
@@ -49,15 +48,10 @@ to define arbitrary workflows which require human workers.
 }
 ```
 
-### Staging
-```
-workmachine --review config.json
-```
-
 ### Production
 
 ```
-workmachine --live --review --output config.json
+workmachine config.json
 ```
 
 # Project by opsZero
@@ -70,7 +64,7 @@ need help with your infrastructure reach out.
 
 ## The MIT License (MIT)
 
-Copyright (c) 2012-2017 opsZero <abhi@opszero.com>
+Copyright (c) 2012-2018 opsZero <abhi@opszero.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

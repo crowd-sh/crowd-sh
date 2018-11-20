@@ -1,0 +1,46 @@
+{
+    "Title": "Find Information for list of websites",
+    "Description": "The information below needs to be cleaned up so please go through each entry and fix the Name and URL to match. Prioritize the Name if it exists otherwise use the URL to find the Name.",
+    "Tags": "research,data,company,research,website",
+    "Reward": "0.01",
+    "AWSProfile": "opszero_mturk",
+    "Live": true,
+    "AirTable": {
+        "Base": "INSERT_APP_KEY",
+        "API": "INSERT_KEY_HERE",
+        "Table": "SourceList"
+    },
+    "FieldTypes": [
+        {
+            "Name": "Name",
+            "Type": "ShortText",
+            "Description": "Use the company name to fill out the fields below. If it doesn't exist use the url below to find the name.",
+            "Value": "",
+            "Options": null
+        },
+        {
+            "Name": "Alive",
+            "Type": "Select",
+            "Description": "If the website is still functional pick Alive otherwise mark it as Dead.",
+            "Value": "",
+            "Options": [
+                "Dead",
+                "Alive"
+            ]
+        },
+        {
+            "Name": "URL",
+            "Type": "ShortText",
+            "Description": "Insert the company website if it doesn't exist. Find the company name using Google. If the url doesn't match the company find the actual website url.",
+            "Value": "",
+            "Options": null
+        },
+        {
+            "Name": "__MTurkID",
+            "Type": "Hidden",
+            "Description": "",
+            "Value": "",
+            "Options": null
+        }
+    ]
+}
