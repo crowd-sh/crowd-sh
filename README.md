@@ -19,6 +19,7 @@ Check out the [samples](./samples) directory for different usage patterns.
     "Description": "Find the Company URL information for the information provided. Incorrect information will be REJECTED.",
     "Tags": "research,data,company,leads",
     "Reward": "0.03",
+    "Live": false,
     "AirTable": {
         "Base": "basename",
         "API": "API",
@@ -48,10 +49,12 @@ Check out the [samples](./samples) directory for different usage patterns.
 }
 ```
 
-### Production
+### Launch
+
+Ensure that there is a field called `__MTurkID` in Airtable.
 
 ```
-workmachine config.json
+workmachine ./config.json
 ```
 
 # Project by opsZero
