@@ -35,10 +35,12 @@
             "Q4": {
                 "Objective": "Make it easy for people to start.",
                 "KeyResults": [{
-                        "Metric": "Publish on Hacker News and get 20 Stars"
+                        "Metric": "Publish on Hacker News and get 20 Stars",
+                        "Done": true
                     },
                     {
-                        "Metric": "Launch DataCleanupGuy.com as a business."
+                        "Metric": "Launch DataCleanupGuy.com as a business.",
+                        "Done": true
                     }
                 ]
             }
