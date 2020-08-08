@@ -15,30 +15,29 @@ import (
 	"github.com/fabioberger/airtable-go"
 )
 
+const (
+	AirtableSourceType = "airtable"
+)
+
 type Workflow struct {
 	Title       string
 	Description string
 	Tags        string
 	Reward      string
 
-	AWSProfile string
 	Live       bool
 
-	AirTable struct {
-		Base  string
-		API   string
-		Table string
+	Provider {
+		Name string
+		Config map[string]string
+	}
 
-		client *airtable.Client
+	Source struct {
+		Type   string
+		Config map[string]string
 	}
 
 	FieldTypes []Field
-
-	MTurk struct {
-		HitTypeId string
-	}
-
-	client *mturk.MTurk
 }
 
 func (w *Workflow) Config() {

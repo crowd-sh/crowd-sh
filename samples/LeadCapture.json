@@ -3,14 +3,16 @@
     "Description": "The information below needs to be cleaned up so please go through each entry and fix the Name and URL to match. Prioritize the Name if it exists otherwise use the URL to find the Name.",
     "Tags": "research,data,company,research,website",
     "Reward": "0.01",
-    "AWSProfile": "opszero_mturk",
     "Live": true,
-    "AirTable": {
-        "Base": "INSERT_APP_KEY",
-        "API": "INSERT_KEY_HERE",
-        "Table": "SourceList"
+    "Source": {
+        "Type": "Airtable",
+        "Config": {
+            "Base": "INSERT_APP_KEY",
+            "API": "INSERT_KEY_HERE",
+            "Table": "SourceList"
+        }
     },
-    "FieldTypes": [
+    "Fields": [
         {
             "Name": "Name",
             "Type": "ShortText",
@@ -37,7 +39,7 @@
         },
         {
             "Name": "__MTurkID",
-            "Type": "Hidden",
+            "Type": "Tracking",
             "Description": "",
             "Value": "",
             "Options": null

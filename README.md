@@ -11,44 +11,6 @@ to define arbitrary workflows which require human workers.
 
 Check out the [samples](./samples) directory for different usage patterns.
 
-### Config
-
-```
-{
-    "Title": "Find Information for Company",
-    "Description": "Find the Company URL information for the information provided. Incorrect information will be REJECTED.",
-    "Tags": "research,data,company,leads",
-    "Reward": "0.03",
-    "Live": false,
-    "AirTable": {
-        "Base": "basename",
-        "API": "API",
-        "Table": "Table"
-    },
-    "Fields": [
-        {
-            "Name": "Company Name",
-            "Type": "ShortText",
-            "Description": "Use the company name to fill out the fields below.",
-        },
-        {
-            "Name": "Company Website",
-            "Type": "ShortText",
-            "Description": "Insert the company website if it doesn't exist. Find the company name using Google.",
-            "Value": "",
-            "Options": null
-        },
-        {
-            "Name": "Company LinkedIn",
-            "Type": "ShortText",
-            "Description": "Use LinkedIn. Find the Company's LinkedIn url here. Put 'not found' if you cannot find the information. ",
-            "Value": "",
-            "Options": null
-        }
-    ]
-}
-```
-
 ### Launch
 
 Ensure that there is a field called `__MTurkID` in Airtable.
@@ -67,7 +29,7 @@ need help with your infrastructure reach out.
 
 ## The MIT License (MIT)
 
-Copyright (c) 2012-2018 opsZero <abhi@opszero.com>
+Copyright (c) 2012-2019 opsZero <abhi@opszero.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
